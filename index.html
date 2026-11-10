@@ -1,0 +1,1101 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<title>KiraKalori</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one-column phone app, Malay/English toggle in the header, food picker with sticky search and category bar. The day summary is styled as a Maklumat Pemakanan (nutrition information) panel with heavy ink rules; entries are plain rows; tabs are fixed at the bottom. */
+:root{
+  --bg:#EFF3EE; --surface:#FFFFFF; --ink:#13201A; --ink2:#4B5B52; --line:#D3DCD4; --soft:#E3EBE4;
+  --accent:#17684A; --accent-ink:#FFFFFF; --ok-bg:#DDEFE4;
+  --warn:#B3321C; --warn-bg:#F9E3DE;
+  --protein:#2A6E93; --carb:#C0840A; --fat:#8B4F9E; --scrim:rgba(10,20,14,.5);
+  --display:"Archivo Black","Arial Black",Impact,system-ui,sans-serif;
+  --body:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1410; --surface:#16201A; --ink:#E9F0EA; --ink2:#9FB2A6; --line:#2A382F; --soft:#1F2B23;
+    --accent:#4DC48B; --accent-ink:#06170E; --ok-bg:#173226;
+    --warn:#FF8E78; --warn-bg:#3A1D17;
+    --protein:#6FB5DB; --carb:#E9B84C; --fat:#C99BD8; --scrim:rgba(0,0,0,.62);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1410; --surface:#16201A; --ink:#E9F0EA; --ink2:#9FB2A6; --line:#2A382F; --soft:#1F2B23;
+  --accent:#4DC48B; --accent-ink:#06170E; --ok-bg:#173226;
+  --warn:#FF8E78; --warn-bg:#3A1D17;
+  --protein:#6FB5DB; --carb:#E9B84C; --fat:#C99BD8; --scrim:rgba(0,0,0,.62);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--body);-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:520px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0);pointer-events:none}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:10px}
+.brand{font-family:var(--display);font-size:20px;letter-spacing:-.01em}
+.sync{font-size:12px;color:var(--ink2);display:flex;align-items:center;gap:6px;min-width:0}
+.sync i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--ink2)}
+.sync.ok i{background:var(--accent)}
+.sync.warn i{background:var(--warn)}
+main{display:flex;flex-direction:column;gap:18px;padding-block:16px calc(92px + env(safe-area-inset-bottom,0px))}
+
+.datebar{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.datebar .d{text-align:center;min-width:0}
+.datebar .d b{display:block;font-size:17px}
+.datebar .d span{font-size:12px;color:var(--ink2)}
+.icon-btn{flex:none;width:44px;height:44px;border:1px solid var(--line);background:var(--surface);border-radius:6px;display:grid;place-items:center;cursor:pointer}
+.icon-btn:disabled{opacity:.35;cursor:not-allowed}
+.icon-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.label{background:var(--surface);border:2px solid var(--ink);border-radius:4px;padding:10px 14px 12px}
+.label .ttl{font-family:var(--display);font-size:21px;line-height:1.1;padding-bottom:6px;border-bottom:8px solid var(--ink);display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.label .ttl small{font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+.kc{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:8px 0 6px}
+.kc .n{font-family:var(--display);font-size:46px;line-height:1;font-variant-numeric:tabular-nums}
+.kc .u{font-weight:600;font-size:13px;color:var(--ink2);margin-left:4px}
+.kc .rem{text-align:right;font-weight:700;font-size:16px;font-variant-numeric:tabular-nums}
+.kc .rem small{display:block;font-weight:500;font-size:12px;color:var(--ink2)}
+.kc .rem.over{color:var(--warn)}
+.gauge{height:10px;background:var(--soft);border-radius:2px;overflow:hidden;margin-bottom:8px}
+.gauge i{display:block;height:100%;background:var(--accent)}
+.gauge.over i{background:var(--warn)}
+.rows{border-top:4px solid var(--ink)}
+.mrow{display:grid;grid-template-columns:104px 1fr auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}
+.mrow:last-child{border-bottom:0;padding-bottom:0}
+.mrow b{font-weight:700}
+.mrow .bar{height:6px;background:var(--soft);border-radius:2px;overflow:hidden}
+.mrow .bar i{display:block;height:100%}
+.mrow .g{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.mrow .g span{font-weight:400;color:var(--ink2)}
+.sub2{font-size:12px;color:var(--ink2);padding-top:8px;border-top:1px solid var(--line);margin-top:4px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 16px;border-radius:6px;border:1px solid var(--line);background:var(--surface);font-weight:600;cursor:pointer;text-align:center}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn .ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.link{border:0;background:none;padding:6px 0;color:var(--ink2);font-size:12.5px;font-weight:600;text-decoration:underline;cursor:pointer}
+.actions{display:grid;grid-template-columns:1.4fr 1fr;gap:10px}
+.actions.one{grid-template-columns:1fr}
+
+.banner{background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;font-size:14px}
+.sect h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin:0 0 2px;display:flex;justify-content:space-between;gap:8px}
+.entry{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.thumb{width:48px;height:48px;border-radius:4px;background:var(--soft);object-fit:cover;display:grid;place-items:center;font-family:var(--display);color:var(--ink2)}
+.entry .nm{font-weight:600;overflow-wrap:anywhere}
+.entry .sub{font-size:12.5px;color:var(--ink2);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.entry .kc2{text-align:right;font-weight:700;font-size:16px;font-variant-numeric:tabular-nums;display:flex;flex-direction:column;align-items:flex-end}
+.entry .kc2 small{font-weight:500;font-size:11px;color:var(--ink2)}
+.empty{padding:18px 0;color:var(--ink2);border-top:1px dashed var(--line);border-bottom:1px dashed var(--line);font-size:14px}
+.note{font-size:13px;color:var(--ink2)}
+
+.mtitle{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mtitle b{font-family:var(--display);font-size:20px}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal .wd{font-size:11px;font-weight:700;color:var(--ink2);text-align:center;text-transform:uppercase;letter-spacing:.04em;padding-bottom:2px}
+.day{aspect-ratio:1/1.1;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:4px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;padding:4px 5px;cursor:pointer;text-align:left}
+.day .num{font-weight:700;font-size:13px}
+.day .kk{font-size:10.5px;font-variant-numeric:tabular-nums;color:var(--ink2)}
+.day.ok{background:var(--ok-bg);border-color:var(--accent)}
+.day.over{background:var(--warn-bg);border-color:var(--warn)}
+.day.low{background:var(--soft);border-style:dashed;border-color:var(--ink2)}
+.day.some{border-color:var(--ink2)}
+.day.today{outline:2px solid var(--ink);outline-offset:1px}
+.day:disabled{opacity:.4;cursor:not-allowed}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--ink2)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:2px;border:1px solid var(--line);display:inline-block}
+.legend .ok{background:var(--ok-bg);border-color:var(--accent)}
+.legend .over{background:var(--warn-bg);border-color:var(--warn)}
+.legend .low{background:var(--soft);border:1px dashed var(--ink2)}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.stats div{border-top:4px solid var(--ink);padding-top:6px}
+.stats b{display:block;font-family:var(--display);font-size:22px;font-variant-numeric:tabular-nums}
+.stats span{font-size:12px;color:var(--ink2)}
+
+h2.sec{font-family:var(--display);font-size:20px;margin:0}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field>label,.field>.lbl{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}
+.in{min-height:46px;width:100%;border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:0 12px;font-size:16px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+.seg button{min-height:46px;border:0;border-right:1px solid var(--line);background:transparent;font-weight:600;cursor:pointer;padding:0 8px}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.form{display:flex;flex-direction:column;gap:14px}
+.warnbox{background:var(--warn-bg);border:1px solid var(--warn);border-radius:6px;padding:10px 12px;font-size:13.5px}
+.wrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--ink2);font:11px var(--body)}
+
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs .wrap{display:grid;grid-template-columns:repeat(3,1fr)}
+.tabs button{border:0;background:none;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11.5px;font-weight:600;color:var(--ink2);cursor:pointer}
+.tabs button[aria-current="page"]{color:var(--accent);box-shadow:inset 0 3px 0 var(--accent)}
+.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+.sheet{position:fixed;inset:0;z-index:50;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center}
+.panel{background:var(--bg);width:100%;max-width:560px;max-height:92%;overflow:auto;border:1px solid var(--line);border-radius:12px 12px 0 0;padding-top:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px;animation:up .18s ease-out}
+@keyframes up{from{transform:translateY(24px);opacity:.4}to{transform:none;opacity:1}}
+.phead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.phead h2{font-family:var(--display);font-size:20px;margin:0}
+.prev{width:100%;max-height:220px;object-fit:cover;border-radius:6px;display:block;background:var(--soft)}
+.busy{display:flex;gap:14px;align-items:flex-start}
+.busy p{margin:0;font-size:14px;color:var(--ink2)}
+.spin{flex:none;width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.nameinp{width:100%;border:0;border-bottom:2px solid var(--ink);background:transparent;font-weight:700;font-size:16px;padding:4px 0;border-radius:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{min-height:38px;padding:0 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-weight:600}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.nums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.nums label{display:flex;flex-direction:column;gap:2px;font-size:11px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.03em;min-width:0}
+.nums input{width:100%;min-height:42px;border:1px solid var(--line);border-radius:4px;padding:0 8px;background:var(--bg);font-size:16px;font-variant-numeric:tabular-nums}
+.total{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:4px solid var(--ink);padding-top:8px;font-weight:700;font-variant-numeric:tabular-nums}
+.total span{font-weight:500;color:var(--ink2)}
+.pickrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;min-height:54px;padding:8px 0;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;cursor:pointer}
+.pickrow small{display:block;color:var(--ink2);font-size:12.5px}
+.pickrow em{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums}
+.foodlist{display:flex;flex-direction:column}
+.btnrow{display:grid;grid-template-columns:1fr 1.4fr;gap:10px}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:6px;display:flex;gap:14px;align-items:center;width:max-content;max-width:calc(100% - 32px);font-weight:500;font-size:14px}
+.toast button{background:none;border:0;color:inherit;font-weight:700;text-decoration:underline;cursor:pointer;padding:4px 0}
+.top .hr{display:flex;align-items:center;gap:10px;min-width:0}
+#syncT{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lang{display:flex;flex:none;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--surface)}
+.lang button{min-width:44px;min-height:40px;border:0;background:transparent;font-weight:700;font-size:13px;color:var(--ink2);cursor:pointer;padding:0 8px}
+.lang button+button{border-left:1px solid var(--line)}
+.lang button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.panel>*{flex:none}
+.panel.tall{height:92%}
+.pickhead{position:sticky;top:-16px;z-index:2;background:var(--bg);margin-top:-16px;padding-top:16px;padding-bottom:4px;display:flex;flex-direction:column;gap:12px}
+.pickfoot{position:sticky;bottom:calc(-18px - env(safe-area-inset-bottom,0px));z-index:2;background:var(--bg);margin-bottom:calc(-18px - env(safe-area-inset-bottom,0px));padding-top:10px;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+.catbar{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
+.catbar .chip{flex:none;white-space:nowrap;min-height:40px}
+.cathead{margin:14px 0 2px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);font-weight:700}
+@media (prefers-reduced-motion:reduce){.panel{animation:none}.spin{animation:none}}
+</style>
+
+</head>
+<body>
+<header class="top"><div class="wrap"><span class="brand">KiraKalori</span><div class="hr"><span class="sync" id="sync"><i></i><span id="syncT">Menyambung…</span></span><div class="lang" role="group" data-ta="langaria" aria-label="Bahasa / Language"><button type="button" data-act="lang" data-lang="ms" aria-pressed="true">BM</button><button type="button" data-act="lang" data-lang="en" aria-pressed="false">EN</button></div></div></div></header>
+<main id="view" class="wrap"></main>
+
+<nav class="tabs" data-ta="nav" aria-label="Menu utama"><div class="wrap">
+  <button data-act="tab" data-tab="log"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v7a2 2 0 0 0 2 2v9M10 3v7a2 2 0 0 1-2 2M18 3c-2.2 1.2-3.5 3.8-3.5 7H18v11"/></svg><span data-t="tab_log">Log</span></button>
+  <button data-act="tab" data-tab="kal"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span data-t="tab_kal">Kalendar</span></button>
+  <button data-act="tab" data-tab="profil"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20.5c.8-4 3.7-6 7.5-6s6.7 2 7.5 6"/></svg><span data-t="tab_profil">Profil</span></button>
+</div></nav>
+
+<div id="sheet" class="sheet" hidden role="dialog" aria-modal="true" data-ta="sheet_aria" aria-label="Tambah makanan"><div id="panel" class="panel"></div></div>
+<div id="toast" class="toast" hidden role="status"></div>
+<input type="file" id="photo" class="vh" accept="image/*">
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- helpers ---------- */
+var $=function(s,r){return (r||document).querySelector(s);};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+var pad=function(n){return String(n).padStart(2,'0');};
+var keyOf=function(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());};
+var fromKey=function(k){var a=k.split('-').map(Number);return new Date(a[0],a[1]-1,a[2]);};
+var todayKey=function(){return keyOf(new Date());};
+var fmt=function(n){return Math.round(n).toLocaleString('en-US');};
+var r1=function(n){return Math.round(n*10)/10;};
+var newId=function(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);};
+var kcOf=function(f){return Math.round(4*f.p+4*f.c+9*f.f);};
+var STANDALONE=true; /* standalone site: data stays in this browser, no photo analysis */
+
+/* ---------- language (Bahasa Malaysia / English) ---------- */
+var LSL='kirakalori.lang';
+var LANG='ms';
+try{var savedLang=localStorage.getItem(LSL);if(savedLang==='en'||savedLang==='ms')LANG=savedLang;}catch(e){}
+
+var I18N={
+ms:{
+ days:['Ahad','Isnin','Selasa','Rabu','Khamis','Jumaat','Sabtu'],
+ months:['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'],
+ mshort:['Jan','Feb','Mac','Apr','Mei','Jun','Jul','Ogo','Sep','Okt','Nov','Dis'],
+ wd:['Is','Se','Ra','Kh','Ju','Sa','Ah'],
+ connecting:'Menyambung…',cloud_ok:'Tersimpan dalam akaun',cloud_local:'Simpan dalam peranti ini',cloud_slow:'Belum bersambung',cloud_error:'Gagal simpan ke akaun',
+ nav:'Menu utama',tab_log:'Log',tab_kal:'Kalendar',tab_profil:'Profil',langaria:'Bahasa / Language',
+ sheet_aria:'Tambah makanan',
+ save_fail:'Tidak dapat simpan ke akaun. Data masih ada dalam peranti ini.',
+ meal_sarapan:'Sarapan',meal_tengahari:'Makan tengah hari',meal_snek:'Snek dan minuman',meal_malam:'Makan malam',
+ prot:'Prot',carb:'Karbo',fat:'Lemak',protein:'Protein',carbs:'Karbohidrat',fats:'Lemak',
+ del:'Padam',today:'Hari ini',yesterday:'Semalam',
+ over:function(n){return 'Lebih '+n;},left:function(n){return 'Baki '+n;},ofkcal:function(n){return 'daripada '+n+' kcal';},
+ nogoal:'Sasaran belum ditetapkan',gauge:function(p){return p+' peratus daripada sasaran';},
+ label_ttl:'Maklumat Pemakanan',label_small:'Anggaran',label_aria:'Ringkasan pemakanan',
+ banner:'Tetapkan sasaran harian di Profil untuk melihat baki kalori dan sasaran protein, karbohidrat dan lemak.',setgoal:'Tetapkan sasaran',
+ photo:'Ambil gambar',manual:'Tambah manual',
+ empty:'Belum ada makanan dicatat. Tekan "Tambah manual" untuk pilih daripada senarai makanan dan minuman.',
+ prevday:'Hari sebelumnya',nextday:'Hari berikutnya',prevmon:'Bulan sebelumnya',nextmon:'Bulan berikutnya',
+ lg_ok:'Dalam sasaran',lg_over:'Melebihi sasaran',lg_low:'Bawah 60% sasaran (mungkin belum lengkap)',
+ cal_nogoal:'Tetapkan sasaran di Profil untuk melihat warna status setiap hari.',
+ st_days:'Hari dicatat',st_avg:'Purata kcal',st_ok:'Dalam sasaran',cal_hint:'Tekan satu hari untuk lihat atau tambah catatan makanan hari itu.',
+ prof_title:'Profil dan sasaran',sex:'Jantina',male:'Lelaki',female:'Perempuan',age:'Umur',weight:'Berat (kg)',height:'Tinggi (cm)',
+ activity:'Tahap aktiviti',
+ act_sedentari:'Duduk sahaja (kerja pejabat, jarang bersenam)',act_ringan:'Ringan (bersenam 1–3 hari seminggu)',act_sederhana:'Sederhana (3–5 hari seminggu)',act_aktif:'Aktif (6–7 hari seminggu)',act_sangat:'Sangat aktif (kerja fizikal atau latihan dua kali sehari)',
+ goal:'Matlamat',lose:'Turun berat',keep:'Kekal berat',rate:'Kadar penurunan',slow:'Perlahan, 0.25 kg seminggu',mod:'Sederhana, 0.5 kg seminggu',
+ fillin:'Isi umur (18–90 tahun), berat (30–300 kg) dan tinggi (120–230 cm) untuk melihat sasaran harian.',
+ goal_ttl:'Sasaran Harian',perday:'sehari',
+ sub2:function(bmr,tdee){return 'Tenaga asas (BMR) '+bmr+' kcal. Jumlah tenaga dibakar sehari '+tdee+' kcal.';},
+ sub2d:function(d,wk){return ' Defisit sekitar '+d+' kcal sehari, kira-kira '+wk+' kg seminggu.';},
+ floored:function(n){return 'Sasaran dinaikkan kepada minimum '+n+' kcal supaya tidak terlalu rendah. Penurunan berat akan lebih perlahan daripada kadar yang dipilih.';},
+ save_goal:'Simpan sasaran',body_weight:'Berat badan',today_weight:'Berat hari ini (kg)',save:'Simpan',
+ chart_aria:'Graf berat badan',chart_need:'Catat berat pada dua hari atau lebih untuk melihat graf.',
+ chart_delta:function(d,since){return 'Perubahan '+d+' kg sejak '+since+'.';},
+ store_ok:'Data anda disimpan secara peribadi dalam akaun Claude anda.',
+ store_local:'Data disimpan dalam pelayar peranti ini sahaja. Jika anda kosongkan data pelayar, catatan akan hilang.',
+ store_bad:'Belum dapat bersambung ke simpanan akaun. Data baharu disimpan dalam peranti ini dahulu.',
+ store_wait:'Menyambung ke simpanan akaun…',
+ disclaimer:'Semua nombor ialah anggaran umum dan bukan nasihat perubatan. Jika anda mempunyai keadaan kesihatan, mengandung atau menyusu, rujuk doktor atau pakar pemakanan sebelum mengubah pemakanan.',
+ close:'Tutup',photo_alt:'Gambar makanan yang dipilih',
+ busy_ttl:'Menganalisis makanan',
+ busy_txt:'Claude sedang mengenal pasti makanan dan menganggar nutrisi. Ini boleh ambil sehingga satu minit. Anda mungkin diminta memberi kebenaran sekali sahaja.',
+ cancel:'Batal',err_ttl:'Tidak dapat dianalisis',retry:'Cuba lagi',pick_manual:'Pilih manual',
+ add_food:'Tambah makanan',search_ph:'Cari nasi lemak, roti canai, kopi…',search_aria:'Cari makanan atau minuman',
+ pick_note:'Nilai ialah anggaran purata untuk satu hidangan. Saiz dan resipi berbeza mengikut kedai.',
+ own:'Isi sendiri',back:function(n){return 'Kembali ('+n+')';},
+ nomatch:'Tiada padanan. Cuba kata kunci lain, atau tekan "Isi sendiri" untuk masukkan nama dan nombor anda.',
+ cat_aria:'Kategori',cat_all:'Semua',
+ cat_nasi:'Nasi',cat_mee:'Mee dan bihun',cat_roti:'Roti dan sarapan',cat_lauk:'Lauk dan sayur',cat_sup:'Sup',cat_snek:'Snek dan kuih',cat_buah:'Buah',cat_minum:'Minuman',cat_barat:'Barat dan antarabangsa',
+ review_est:'Semak anggaran',review_food:'Semak makanan',
+ conf:function(c,note){return 'Keyakinan anggaran: <b>'+c+'</b>.'+(note?' '+note:'')+' Betulkan nama atau saiz portion jika perlu.';},
+ conf_tinggi:'tinggi',conf_sederhana:'sederhana',conf_rendah:'rendah',
+ food_name:'Nama makanan',estimate:'Anggaran: ',portion_size:'Saiz portion',
+ n_prot:'Prot. g',n_carb:'Karbo g',n_fat:'Lemak g',rm_item:'Buang item',add_more:'Tambah item lain',meal:'Waktu makan',
+ total:'Jumlah',save_log:'Simpan ke log',
+ saved_n:function(n,k){return n+' item disimpan, '+k+' kcal';},
+ deleted:'Item dipadam',undo:'Buat asal',
+ goal_saved:function(k){return 'Sasaran disimpan: '+k+' kcal sehari';},
+ weight_bad:'Masukkan berat antara 20 dan 400 kg',weight_saved:'Berat disimpan',
+ food_default:'Makanan',
+ err_not_granted:'Claude belum dibenarkan menganalisis gambar. Cuba lagi dan tekan benarkan bila diminta.',
+ err_sampling_disabled:'Analisis gambar tidak tersedia untuk akaun ini. Anda boleh pilih makanan secara manual.',
+ err_not_declared:'Analisis gambar hanya berfungsi bila halaman ini dibuka dalam Claude. Anda boleh pilih makanan secara manual.',
+ err_capability_disabled:'Analisis gambar tidak tersedia pada paparan ini. Anda boleh pilih makanan secara manual.',
+ err_capability_removed:'Analisis gambar tidak tersedia pada paparan ini. Anda boleh pilih makanan secara manual.',
+ err_images_unavailable:'Paparan ini tidak boleh menghantar gambar kepada Claude. Anda boleh pilih makanan secara manual.',
+ err_rate_limited:'Terlalu banyak permintaan, atau had penggunaan Claude anda sudah dicapai. Cuba lagi sebentar nanti.',
+ err_session_expired:'Sesi sudah tamat. Log masuk semula ke Claude, kemudian cuba lagi.',
+ err_image_rejected:'Gambar ini tidak dapat dibaca. Cuba gambar lain (JPEG atau PNG).',
+ err_refused:'Gambar ini tidak dapat dianalisis. Cuba gambar lain.',
+ err_invalid_json:'Keputusan tidak dapat dibaca. Cuba lagi atau ambil gambar yang lebih jelas.',
+ err_empty_completion:'Tiada keputusan diterima. Cuba lagi.',
+ err_nofood:'Tiada makanan atau minuman dikesan dalam gambar ini.',
+ err_upstream_error:'Sambungan terputus. Cuba lagi.'
+},
+en:{
+ days:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+ months:['January','February','March','April','May','June','July','August','September','October','November','December'],
+ mshort:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+ wd:['Mo','Tu','We','Th','Fr','Sa','Su'],
+ connecting:'Connecting…',cloud_ok:'Saved to your account',cloud_local:'Saved on this device',cloud_slow:'Not connected',cloud_error:'Could not save to account',
+ nav:'Main menu',tab_log:'Log',tab_kal:'Calendar',tab_profil:'Profile',langaria:'Bahasa / Language',
+ sheet_aria:'Add food',
+ save_fail:'Could not save to your account. Your data is still on this device.',
+ meal_sarapan:'Breakfast',meal_tengahari:'Lunch',meal_snek:'Snacks and drinks',meal_malam:'Dinner',
+ prot:'Prot',carb:'Carbs',fat:'Fat',protein:'Protein',carbs:'Carbohydrates',fats:'Fat',
+ del:'Delete',today:'Today',yesterday:'Yesterday',
+ over:function(n){return 'Over '+n;},left:function(n){return 'Left '+n;},ofkcal:function(n){return 'of '+n+' kcal';},
+ nogoal:'No daily goal set',gauge:function(p){return p+' percent of goal';},
+ label_ttl:'Nutrition Information',label_small:'Estimate',label_aria:'Nutrition summary',
+ banner:'Set your daily goal in Profile to see calories left and your protein, carbohydrate and fat targets.',setgoal:'Set goal',
+ photo:'Take photo',manual:'Add manually',
+ empty:'No food logged yet. Tap "Add manually" to pick from the food and drink list.',
+ prevday:'Previous day',nextday:'Next day',prevmon:'Previous month',nextmon:'Next month',
+ lg_ok:'On target',lg_over:'Over target',lg_low:'Under 60% of goal (may be incomplete)',
+ cal_nogoal:'Set your goal in Profile to see a status colour for each day.',
+ st_days:'Days logged',st_avg:'Average kcal',st_ok:'On target',cal_hint:"Tap a day to view or add that day's food log.",
+ prof_title:'Profile and goal',sex:'Sex',male:'Male',female:'Female',age:'Age',weight:'Weight (kg)',height:'Height (cm)',
+ activity:'Activity level',
+ act_sedentari:'Sedentary (office job, rarely exercise)',act_ringan:'Light (exercise 1–3 days a week)',act_sederhana:'Moderate (3–5 days a week)',act_aktif:'Active (6–7 days a week)',act_sangat:'Very active (physical job or training twice a day)',
+ goal:'Goal',lose:'Lose weight',keep:'Maintain weight',rate:'Rate of loss',slow:'Slow, 0.25 kg a week',mod:'Moderate, 0.5 kg a week',
+ fillin:'Enter your age (18–90), weight (30–300 kg) and height (120–230 cm) to see your daily goal.',
+ goal_ttl:'Daily Goal',perday:'per day',
+ sub2:function(bmr,tdee){return 'Basal energy (BMR) '+bmr+' kcal. Total energy burned per day '+tdee+' kcal.';},
+ sub2d:function(d,wk){return ' Deficit of about '+d+' kcal a day, roughly '+wk+' kg a week.';},
+ floored:function(n){return "Your goal was raised to the minimum of "+n+" kcal so it isn't too low. Weight loss will be slower than the rate you chose.";},
+ save_goal:'Save goal',body_weight:'Body weight',today_weight:"Today's weight (kg)",save:'Save',
+ chart_aria:'Body weight chart',chart_need:'Log your weight on two or more days to see the chart.',
+ chart_delta:function(d,since){return 'Change '+d+' kg since '+since+'.';},
+ store_ok:'Your data is stored privately in your Claude account.',
+ store_local:'Data is stored in this device\'s browser only. If you clear your browser data, your log will be lost.',
+ store_bad:'Cannot connect to account storage yet. New data is saved on this device for now.',
+ store_wait:'Connecting to account storage…',
+ disclaimer:'All numbers are general estimates, not medical advice. If you have a health condition, are pregnant or breastfeeding, talk to a doctor or dietitian before changing your diet.',
+ close:'Close',photo_alt:'Selected food photo',
+ busy_ttl:'Analysing food',
+ busy_txt:'Claude is identifying the food and estimating nutrition. This can take up to a minute. You may be asked to give permission once.',
+ cancel:'Cancel',err_ttl:'Could not analyse',retry:'Try again',pick_manual:'Pick manually',
+ add_food:'Add food',search_ph:'Search nasi lemak, chicken rice, coffee…',search_aria:'Search food or drink',
+ pick_note:'Values are average estimates for one serving. Sizes and recipes vary by shop.',
+ own:'Enter my own',back:function(n){return 'Back ('+n+')';},
+ nomatch:'No match. Try another keyword, or tap "Enter my own" to add your own name and numbers.',
+ cat_aria:'Categories',cat_all:'All',
+ cat_nasi:'Rice',cat_mee:'Noodles',cat_roti:'Bread and breakfast',cat_lauk:'Mains and sides',cat_sup:'Soups',cat_snek:'Snacks and kuih',cat_buah:'Fruit',cat_minum:'Drinks',cat_barat:'Western and international',
+ review_est:'Review estimate',review_food:'Review food',
+ conf:function(c,note){return 'Estimate confidence: <b>'+c+'</b>.'+(note?' '+note:'')+' Correct the name or portion size if needed.';},
+ conf_tinggi:'high',conf_sederhana:'medium',conf_rendah:'low',
+ food_name:'Food name',estimate:'Estimate: ',portion_size:'Portion size',
+ n_prot:'Prot. g',n_carb:'Carbs g',n_fat:'Fat g',rm_item:'Remove item',add_more:'Add another item',meal:'Meal',
+ total:'Total',save_log:'Save to log',
+ saved_n:function(n,k){return n+(n===1?' item':' items')+' saved, '+k+' kcal';},
+ deleted:'Item deleted',undo:'Undo',
+ goal_saved:function(k){return 'Goal saved: '+k+' kcal a day';},
+ weight_bad:'Enter a weight between 20 and 400 kg',weight_saved:'Weight saved',
+ food_default:'Food',
+ err_not_granted:'Claude has not been allowed to analyse photos yet. Try again and tap allow when asked.',
+ err_sampling_disabled:'Photo analysis is not available for this account. You can pick food manually.',
+ err_not_declared:'Photo analysis only works when this page is opened in Claude. You can pick food manually.',
+ err_capability_disabled:'Photo analysis is not available in this view. You can pick food manually.',
+ err_capability_removed:'Photo analysis is not available in this view. You can pick food manually.',
+ err_images_unavailable:'This view cannot send photos to Claude. You can pick food manually.',
+ err_rate_limited:'Too many requests, or your Claude usage limit has been reached. Try again in a little while.',
+ err_session_expired:'Your session has expired. Sign in to Claude again, then try again.',
+ err_image_rejected:'This photo could not be read. Try another one (JPEG or PNG).',
+ err_refused:'This photo could not be analysed. Try another one.',
+ err_invalid_json:'The result could not be read. Try again or take a clearer photo.',
+ err_empty_completion:'No result received. Try again.',
+ err_nofood:'No food or drink was detected in this photo.',
+ err_upstream_error:'The connection dropped. Try again.'
+}};
+function tr(k){
+  var d=I18N[LANG],s=d&&d[k];
+  if(s==null)s=I18N.ms[k];
+  if(typeof s==='function')return s.apply(null,[].slice.call(arguments,1));
+  return s==null?k:s;
+}
+var MSHORT_=function(i){return tr('mshort')[i];};
+
+/* ---------- nutrition maths ---------- */
+/*CALC*/
+var ACT={sedentari:1.2,ringan:1.375,sederhana:1.55,aktif:1.725,sangat:1.9};
+function calc(p){
+  var age=+p.age,w=+p.weight,h=+p.height;
+  if(!(age>=18&&age<=90&&w>=30&&w<=300&&h>=120&&h<=230))return null;
+  var male=p.sex==='L';
+  var bmr=10*w+6.25*h-5*age+(male?5:-161);
+  var tdee=bmr*(ACT[p.activity]||1.2);
+  var lose=p.goal==='turun';
+  var want=lose?(p.pace==='perlahan'?275:550):0;
+  var floor=male?1500:1200;
+  var target=tdee-want,floored=false;
+  if(target<floor){target=floor;floored=true;}
+  target=Math.round(target/10)*10;
+  var protein=Math.min(Math.round(w*(lose?1.6:1.2)),Math.round(target*0.30/4));
+  var fat=Math.round(target*0.25/9);
+  var carbs=Math.max(0,Math.round((target-protein*4-fat*9)/4));
+  return {bmr:Math.round(bmr),tdee:Math.round(tdee),target:target,protein:protein,fat:fat,carbs:carbs,floored:floored,floor:floor,deficit:Math.max(0,Math.round(tdee-target))};
+}
+/*ENDCALC*/
+
+/* ---------- food and drink list ----------
+   Row: [category, Malay name, English name, Malay portion, English portion, protein g, carbs g, fat g]
+   Values are average estimates for one typical serving. */
+var CATS=['nasi','mee','roti','lauk','sup','snek','buah','minum','barat'];
+var FOOD_ROWS=[
+ ['nasi','Nasi lemak biasa','Nasi lemak (plain)','1 bungkus (telur, ikan bilis, sambal)','1 packet (egg, anchovies, sambal)',12,60,18],
+ ['nasi','Nasi lemak ayam goreng','Nasi lemak with fried chicken','1 pinggan','1 plate',28,80,38],
+ ['nasi','Nasi putih','Plain white rice','1 pinggan, sekitar 200 g','1 plate, about 200 g',5,57,0.5],
+ ['nasi','Nasi goreng kampung','Kampung fried rice','1 pinggan','1 plate',14,70,20],
+ ['nasi','Nasi goreng ayam','Chicken fried rice','1 pinggan','1 plate',22,75,20],
+ ['nasi','Nasi goreng USA','Nasi goreng USA (with fried chicken and egg)','1 pinggan','1 plate',26,78,24],
+ ['nasi','Nasi goreng cina','Chinese fried rice','1 pinggan','1 plate',15,72,18],
+ ['nasi','Nasi ayam','Hainanese chicken rice','1 pinggan (ayam rebus atau panggang)','1 plate (poached or roasted chicken)',28,75,17],
+ ['nasi','Nasi kandar (ayam, sayur, kuah campur)','Nasi kandar (chicken, veg, mixed curry)','1 pinggan','1 plate',35,95,35],
+ ['nasi','Nasi dagang','Nasi dagang (rice with fish curry)','1 pinggan','1 plate',25,80,28],
+ ['nasi','Nasi kerabu','Nasi kerabu (blue herb rice)','1 pinggan','1 plate',22,78,14],
+ ['nasi','Nasi campur (2 lauk + sayur)','Mixed rice (2 dishes + veg)','1 pinggan','1 plate',28,85,22],
+ ['nasi','Nasi briyani ayam','Chicken biryani','1 pinggan','1 plate',30,85,26],
+ ['nasi','Nasi tomato dengan ayam masak merah','Tomato rice with ayam masak merah','1 pinggan','1 plate',26,80,22],
+ ['nasi','Ayam penyet dengan nasi','Ayam penyet (smashed fried chicken) with rice','1 pinggan','1 plate',35,80,38],
+ ['nasi','Bubur ayam','Chicken porridge','1 mangkuk','1 bowl',15,38,6],
+ ['nasi','Bubur lambuk','Bubur lambuk (spiced rice porridge)','1 mangkuk','1 bowl',12,35,8],
+
+ ['mee','Mee goreng mamak','Mamak fried noodles','1 pinggan','1 plate',16,72,22],
+ ['mee','Char kuey teow','Char kuey teow (fried flat noodles)','1 pinggan','1 plate',18,80,34],
+ ['mee','Laksa kari','Curry laksa','1 mangkuk','1 bowl',20,60,24],
+ ['mee','Asam laksa','Asam laksa (Penang)','1 mangkuk','1 bowl',15,72,6],
+ ['mee','Mee rebus','Mee rebus (noodles in sweet potato gravy)','1 mangkuk','1 bowl',18,68,12],
+ ['mee','Mee kari','Curry mee','1 mangkuk','1 bowl',20,62,22],
+ ['mee','Bihun goreng','Fried vermicelli','1 pinggan','1 plate',12,60,16],
+ ['mee','Bihun sup','Vermicelli soup','1 mangkuk','1 bowl',18,45,6],
+ ['mee','Kuey teow sup','Flat noodle soup','1 mangkuk','1 bowl',18,48,6],
+ ['mee','Wantan mee (kering)','Wantan mee (dry)','1 pinggan','1 plate',20,65,14],
+ ['mee','Pan mee','Pan mee (hand-torn noodles)','1 mangkuk','1 bowl',22,68,12],
+ ['mee','Hokkien mee','Hokkien mee (dark soy fried noodles)','1 pinggan','1 plate',22,78,16],
+ ['mee','Maggi goreng','Fried instant noodles','1 pinggan','1 plate',10,58,18],
+ ['mee','Mi segera rebus','Instant noodles (boiled)','1 paket','1 packet',8,45,13],
+
+ ['roti','Roti canai kosong','Plain roti canai','1 keping','1 piece',6,38,14],
+ ['roti','Roti canai dengan dal','Roti canai with dhal','1 keping + dal','1 piece + dhal',9,46,15],
+ ['roti','Roti telur','Egg roti','1 keping','1 piece',12,40,20],
+ ['roti','Murtabak','Murtabak (stuffed pan-fried bread)','1 potong (¼ keping)','1 slice (¼ of a whole)',14,42,20],
+ ['roti','Thosai','Thosai (dosa)','1 keping','1 piece',3,28,4],
+ ['roti','Chapati','Chapati','1 keping','1 piece',3,24,3],
+ ['roti','Naan','Naan','1 keping','1 piece',8,45,6],
+ ['roti','Roti bakar kaya mentega','Kaya butter toast','2 keping','2 slices',7,40,12],
+ ['roti','Roti putih','White bread','2 keping','2 slices',6,26,2],
+ ['roti','Oat dengan susu','Oatmeal with milk','1 mangkuk','1 bowl',8,38,6],
+ ['roti','Bijirin sarapan dengan susu','Breakfast cereal with milk','1 mangkuk','1 bowl',8,42,4],
+
+ ['lauk','Ayam goreng','Fried chicken (Malay-style)','1 ketul paha','1 thigh piece',20,8,15],
+ ['lauk','Ayam panggang','Grilled chicken','1 ketul paha','1 thigh piece',24,3,11],
+ ['lauk','Ayam masak merah','Ayam masak merah (chicken in spicy tomato sauce)','1 ketul dengan kuah','1 piece with sauce',22,8,14],
+ ['lauk','Rendang ayam','Chicken rendang','1 ketul','1 piece',22,6,16],
+ ['lauk','Rendang daging','Beef rendang','3 ketul kecil','3 small pieces',20,5,16],
+ ['lauk','Kari ayam','Chicken curry','1 mangkuk kecil (2 ketul)','1 small bowl (2 pieces)',24,8,16],
+ ['lauk','Ayam tandoori','Tandoori chicken','1 ketul paha','1 thigh piece',28,4,10],
+ ['lauk','Satay ayam','Chicken satay','5 cucuk dengan kuah','5 sticks with peanut sauce',20,10,12],
+ ['lauk','Ikan goreng','Fried fish','1 ekor kecil atau 1 potong','1 small fish or 1 piece',18,4,10],
+ ['lauk','Ikan bakar','Grilled fish','1 ekor kecil','1 small fish',22,1,8],
+ ['lauk','Ikan masak asam pedas','Ikan asam pedas (sour and spicy fish)','1 potong dengan kuah','1 piece with gravy',20,6,7],
+ ['lauk','Sambal sotong','Sambal squid','1 senduk','1 serving spoon',12,8,8],
+ ['lauk','Sambal udang','Sambal prawns','5 ekor','5 prawns',15,6,9],
+ ['lauk','Ikan bilis goreng','Fried anchovies','2 sudu besar','2 tbsp',6,3,8],
+ ['lauk','Telur rebus','Boiled egg','1 biji','1 egg',6,0.5,5],
+ ['lauk','Telur mata','Fried egg','1 biji','1 egg',6,0.5,7],
+ ['lauk','Telur dadar','Omelette','1 biji telur','1 egg',7,1,9],
+ ['lauk','Tempe goreng','Fried tempeh','2 keping','2 pieces',10,6,9],
+ ['lauk','Tauhu goreng','Fried tofu','3 keping','3 pieces',8,5,10],
+ ['lauk','Kangkung goreng belacan','Stir-fried water spinach with belacan','1 hidangan','1 serving',3,6,6],
+ ['lauk','Sayur campur goreng','Mixed vegetable stir-fry','1 hidangan','1 serving',3,8,6],
+ ['lauk','Terung sambal','Sambal aubergine','1 hidangan','1 serving',2,8,8],
+ ['lauk','Gado-gado','Gado-gado (vegetables in peanut sauce)','1 pinggan','1 plate',14,30,16],
+ ['lauk','Dal','Dhal','1 senduk','1 serving spoon',6,16,3],
+
+ ['sup','Sup ayam','Chicken soup','1 mangkuk','1 bowl',15,8,6],
+ ['sup','Sup tulang','Bone soup','1 mangkuk','1 bowl',18,6,12],
+ ['sup','Sup ekor','Oxtail soup','1 mangkuk','1 bowl',20,8,14],
+ ['sup','Sup kambing','Lamb soup','1 mangkuk','1 bowl',22,6,14],
+ ['sup','Tomyam','Tom yum soup','1 mangkuk dengan udang','1 bowl with prawns',14,8,6],
+ ['sup','Soto ayam','Soto ayam (chicken soup with rice cake)','1 mangkuk','1 bowl',22,38,8],
+ ['sup','Sup sayur','Vegetable soup','1 mangkuk','1 bowl',3,10,2],
+
+ ['snek','Karipap','Curry puff','1 biji','1 piece',2,15,7],
+ ['snek','Kuih lapis','Kuih lapis (layered cake)','1 keping','1 piece',1,22,2],
+ ['snek','Onde-onde','Onde-onde (pandan rice balls with coconut)','3 biji','3 pieces',2,28,5],
+ ['snek','Kuih seri muka','Seri muka (pandan custard rice cake)','1 keping','1 piece',3,30,6],
+ ['snek','Cucur udang','Prawn fritter','1 biji','1 piece',4,12,8],
+ ['snek','Pisang goreng','Fried banana fritters','2 keping','2 pieces',2,36,10],
+ ['snek','Keropok lekor','Keropok lekor (fish sausage)','5 keping','5 pieces',8,30,8],
+ ['snek','Keropok','Prawn crackers','1 bungkus kecil (30 g)','1 small bag (30 g)',1,18,9],
+ ['snek','Popiah basah','Fresh popiah (spring roll)','1 gulung','1 roll',6,25,6],
+ ['snek','Apam balik','Apam balik (peanut pancake)','1 keping','1 piece',6,38,12],
+ ['snek','Pau ayam','Chicken bun (pau)','1 biji','1 bun',8,32,6],
+ ['snek','Dim sum ayam (siu mai)','Chicken dim sum (siu mai)','3 biji','3 pieces',12,16,9],
+ ['snek','Cendol','Cendol','1 mangkuk','1 bowl',2,55,8],
+ ['snek','Ais kacang (ABC)','Ais kacang (ABC)','1 mangkuk','1 bowl',3,55,2],
+ ['snek','Bubur cha cha','Bubur cha cha','1 mangkuk','1 bowl',3,50,9],
+ ['snek','Kacang tanah goreng','Roasted peanuts','1 genggam (30 g)','1 handful (30 g)',7,6,14],
+ ['snek','Biskut','Biscuits','2 keping','2 pieces',1,10,4],
+ ['snek','Coklat','Chocolate bar','1 bar kecil (40 g)','1 small bar (40 g)',3,22,13],
+ ['snek','Aiskrim','Ice cream','1 scoop','1 scoop',2,16,7],
+ ['snek','Donat','Doughnut','1 biji','1 piece',4,30,12],
+ ['snek','Kek','Cake','1 keping','1 slice',4,40,16],
+ ['snek','Yogurt','Yogurt','1 cawan (150 g)','1 cup (150 g)',5,18,3],
+
+ ['buah','Pisang','Banana','1 biji sederhana','1 medium',1,27,0.4],
+ ['buah','Epal','Apple','1 biji sederhana','1 medium',0.5,25,0.3],
+ ['buah','Oren','Orange','1 biji sederhana','1 medium',1.2,15,0.2],
+ ['buah','Betik','Papaya','1 mangkuk (150 g)','1 bowl (150 g)',1,16,0.3],
+ ['buah','Tembikai','Watermelon','1 hirisan besar (200 g)','1 large slice (200 g)',1.2,15,0.3],
+ ['buah','Nanas','Pineapple','1 mangkuk (150 g)','1 bowl (150 g)',0.8,20,0.2],
+ ['buah','Mangga','Mango','1 biji sederhana','1 medium',1.5,28,0.5],
+ ['buah','Jambu batu','Guava','1 biji','1 piece',2.5,15,0.8],
+ ['buah','Durian','Durian','3 ulas','3 pods',3,36,5],
+ ['buah','Anggur','Grapes','1 genggam (100 g)','1 handful (100 g)',0.6,17,0.2],
+ ['buah','Strawberi','Strawberries','1 mangkuk (150 g)','1 bowl (150 g)',1,12,0.5],
+ ['buah','Buah naga','Dragon fruit','½ biji','½ fruit',2,16,0.5],
+ ['buah','Alpukat','Avocado','½ biji','½ fruit',2,9,15],
+
+ ['minum','Teh tarik','Teh tarik (pulled milk tea)','1 gelas','1 glass',3,22,4.5],
+ ['minum','Milo ais','Iced Milo','1 gelas','1 glass',4,28,4],
+ ['minum','Milo panas','Hot Milo','1 cawan','1 cup',4,22,4],
+ ['minum','Kopi O (bergula)','Black coffee with sugar (kopi O)','1 cawan','1 cup',0.3,8,0],
+ ['minum','Kopi O kosong','Black coffee, no sugar','1 cawan','1 cup',0.3,0,0],
+ ['minum','Kopi (susu dan gula)','Coffee with milk and sugar','1 cawan','1 cup',2,14,3],
+ ['minum','Kopi ais (dengan susu)','Iced coffee with milk','1 gelas','1 glass',3,20,4],
+ ['minum','Kopi 3 dalam 1','3-in-1 instant coffee','1 paket','1 sachet',1,17,3],
+ ['minum','Latte','Latte','1 cawan (250 ml)','1 cup (250 ml)',8,12,8],
+ ['minum','Cappuccino','Cappuccino','1 cawan (200 ml)','1 cup (200 ml)',6,9,6],
+ ['minum','Teh O ais limau','Iced lemon tea','1 gelas','1 glass',0,20,0],
+ ['minum','Teh O (bergula)','Tea with sugar (teh O)','1 cawan','1 cup',0,10,0],
+ ['minum','Teh O kosong','Tea, no sugar','1 cawan','1 cup',0,0,0],
+ ['minum','Teh C (susu sejat)','Tea with evaporated milk (teh C)','1 cawan','1 cup',2,14,3],
+ ['minum','Teh halia','Ginger tea','1 cawan','1 cup',0,10,0],
+ ['minum','Teh bunga kekwa','Chrysanthemum tea','1 gelas','1 glass',0,18,0],
+ ['minum','Air sirap bandung','Rose syrup milk (bandung)','1 gelas','1 glass',2,30,3],
+ ['minum','Air sirap','Rose syrup drink (sirap)','1 gelas','1 glass',0,25,0],
+ ['minum','Air kelapa','Coconut water','1 biji (sekitar 350 ml)','1 coconut (about 350 ml)',1.5,13,0.5],
+ ['minum','Air tebu','Sugarcane juice','1 gelas (250 ml)','1 glass (250 ml)',0,28,0],
+ ['minum','Air barli','Barley water','1 gelas','1 glass',0.5,24,0],
+ ['minum','Air cincau','Grass jelly drink','1 gelas','1 glass',0.5,22,0],
+ ['minum','Jus oren','Orange juice','1 gelas (250 ml)','1 glass (250 ml)',2,26,0.5],
+ ['minum','Jus epal','Apple juice','1 gelas (250 ml)','1 glass (250 ml)',0.3,28,0.3],
+ ['minum','Jus tembikai','Watermelon juice','1 gelas (250 ml)','1 glass (250 ml)',1,18,0.3],
+ ['minum','Smoothie buah','Fruit smoothie','1 gelas (350 ml)','1 glass (350 ml)',3,45,2],
+ ['minum','Air soya','Soy milk','1 gelas (250 ml)','1 glass (250 ml)',6,14,4],
+ ['minum','Susu segar','Full-cream milk','1 gelas (250 ml)','1 glass (250 ml)',8,12,8],
+ ['minum','Susu rendah lemak','Low-fat milk','1 gelas (250 ml)','1 glass (250 ml)',8,12,2.5],
+ ['minum','Susu coklat','Chocolate milk','1 gelas (250 ml)','1 glass (250 ml)',8,26,7],
+ ['minum','Yakult','Yakult','1 botol (65 ml)','1 bottle (65 ml)',1,11,0],
+ ['minum','Teh susu mutiara (bubble tea)','Bubble milk tea','1 cawan (500 ml)','1 cup (500 ml)',3,65,7],
+ ['minum','Minuman bergas (Coca-Cola)','Fizzy drink (Coca-Cola)','1 tin (330 ml)','1 can (330 ml)',0,35,0],
+ ['minum','100Plus','100Plus isotonic drink','1 tin (325 ml)','1 can (325 ml)',0,18,0],
+
+ ['barat','Burger ayam','Chicken burger','1 biji','1 burger',25,40,20],
+ ['barat','Burger daging','Beef burger','1 biji','1 burger',22,38,22],
+ ['barat','Burger Ramly (daging + telur)','Ramly burger (beef + egg)','1 biji','1 burger',22,40,24],
+ ['barat','Hot dog','Hot dog','1 biji','1 hot dog',12,30,18],
+ ['barat','Piza','Pizza','1 keping','1 slice',11,30,10],
+ ['barat','Spageti bolognese','Spaghetti bolognese','1 pinggan','1 plate',22,75,16],
+ ['barat','Spageti carbonara','Spaghetti carbonara','1 pinggan','1 plate',20,70,28],
+ ['barat','Sandwic tuna','Tuna sandwich','1 sandwic','1 sandwich',15,30,12],
+ ['barat','Sandwic telur','Egg sandwich','1 sandwic','1 sandwich',12,28,10],
+ ['barat','Kentang goreng','French fries','1 bungkus sederhana','1 medium serving',4,42,17],
+ ['barat','Nuget ayam','Chicken nuggets','6 ketul','6 pieces',14,16,17],
+ ['barat','Ayam goreng segera','Fast-food fried chicken','1 ketul paha','1 thigh piece',20,12,18],
+ ['barat','Stik daging','Beef steak','200 g','200 g',45,3,22],
+ ['barat','Fish and chips','Fish and chips','1 hidangan','1 serving',26,60,30],
+ ['barat','Salad dengan sos','Salad with dressing','1 pinggan','1 plate',3,10,10],
+ ['barat','Sushi','Sushi','6 keping','6 pieces',14,42,4],
+ ['barat','Ramen','Ramen','1 mangkuk','1 bowl',22,65,20],
+ ['barat','Pad Thai','Pad Thai','1 pinggan','1 plate',20,80,22],
+ ['barat','Kebab ayam','Chicken kebab wrap','1 balut','1 wrap',25,45,18]
+];
+var FOODS=FOOD_ROWS.map(function(r){return {cat:r[0],n:r[1],e:r[2]||r[1],s:r[3],se:r[4]||r[3],p:r[5],c:r[6],f:r[7]};});
+var foodName=function(f){return LANG==='en'?f.e:f.n;};
+var foodPortion=function(f){return LANG==='en'?f.se:f.s;};
+
+var MEALKEYS=['sarapan','tengahari','snek','malam'];
+var MULTS=[[0.5,'½×'],[0.75,'¾×'],[1,'1×'],[1.25,'1¼×'],[1.5,'1½×'],[2,'2×']];
+var ACTKEYS=['sedentari','ringan','sederhana','aktif','sangat'];
+var ERRK={not_granted:1,sampling_disabled:1,not_declared:1,capability_disabled:1,capability_removed:1,images_unavailable:1,rate_limited:1,session_expired:1,image_rejected:1,refused:1,invalid_json:1,empty_completion:1,nofood:1,upstream_error:1};
+var RETRY={invalid_json:1,empty_completion:1,upstream_error:1,not_granted:1,nofood:0};
+var CONFMAP={high:'tinggi',medium:'sederhana',low:'rendah',tinggi:'tinggi',sederhana:'sederhana',rendah:'rendah'};
+function buildPrompt(){
+  var en=LANG==='en',lang=en?'English':'Bahasa Malaysia';
+  return [
+   'You are the nutrition assistant inside a calorie-tracking app used in Malaysia. The attached photo shows a meal or drink.',
+   'Identify each distinct food or drink you can see, at most 6 items. Use the common Malaysian or Malay name when the dish is local (for example Nasi lemak, Roti canai, Teh tarik, Ayam goreng); otherwise use a short name in '+lang+'. Split a plate into components only when they matter for calories (rice, fried chicken, egg, sambal).',
+   'For each item estimate the portion actually shown (use visible cues such as the plate, spoon, cup or hand) and the nutrition of that portion.',
+   'Reply with only one JSON object and no other text, in this shape:',
+   '{"is_food":true,"items":[{"name":"Nasi lemak","portion":"'+(en?'1 plate, about 300 g':'1 pinggan, sekitar 300 g')+'","kcal":520,"protein_g":14,"carbs_g":68,"fat_g":22}],"confidence":"high","note":"one short sentence in '+lang+' about what is uncertain, such as oil, sugar or hidden ingredients"}',
+   'confidence is one of "high", "medium", "low". The portion text is in '+lang+'. Use plain numbers, never ranges. Keep kcal close to 4*protein_g + 4*carbs_g + 9*fat_g.',
+   'If the photo contains no food or drink, reply {"is_food":false,"items":[],"confidence":"low","note":"short reason in '+lang+'"}.'
+  ].join('\n');
+}
+
+/* ---------- state ---------- */
+var LS='kirakalori.v1';
+var now0=new Date();
+var state={tab:'log',date:todayKey(),cal:{y:now0.getFullYear(),m:now0.getMonth()},profile:null,days:{},cloud:'connecting',draft:null,touched:false};
+var S={open:false,mode:'',items:[],meal:'sarapan',preview:null,th:null,blob:null,note:'',conf:'',err:'',q:'',cat:'all',src:'manual'};
+var db=null,userId=null,samplePromise=Promise.resolve(null),ctl=null,aid=0,lastDel=null,toastT=null,writeQ={};
+
+function lsLoad(){try{var j=JSON.parse(localStorage.getItem(LS)||'null');if(j){state.profile=j.profile||null;state.days=j.days||{};}}catch(e){}}
+function lsSave(){try{localStorage.setItem(LS,JSON.stringify({profile:state.profile,days:state.days}));}catch(e){}}
+function hasLocal(){return !!state.profile||Object.keys(state.days).some(function(k){var d=state.days[k];return d&&((d.entries&&d.entries.length)||d.weight);});}
+
+function setCloud(s){
+  state.cloud=s;
+  var el=$('#sync'),tx=$('#syncT');
+  var m={connecting:['connecting',''],ok:['cloud_ok','ok'],local:['cloud_local',''],slow:['cloud_slow','warn'],error:['cloud_error','warn']}[s]||['connecting',''];
+  tx.textContent=tr(m[0]);el.className='sync '+m[1];
+}
+function queue(key,fn){var p=(writeQ[key]||Promise.resolve()).catch(function(){}).then(fn);writeQ[key]=p;return p;}
+function cdoc(id){return db.collection('data/users/'+userId).doc(id);}
+function clean(o){return JSON.parse(JSON.stringify(o));}
+function persistDay(k){
+  lsSave();
+  if(!db||!userId)return Promise.resolve();
+  return queue('d-'+k,function(){
+    var d=state.days[k];
+    if(d&&((d.entries&&d.entries.length)||d.weight>0)){
+      var o={date:k,entries:d.entries||[]};if(d.weight>0)o.weight=d.weight;
+      return cdoc('d-'+k).set(clean(o));
+    }
+    return cdoc('d-'+k).delete();
+  }).catch(function(){setCloud('error');toast(tr('save_fail'));});
+}
+function persistProfile(){
+  lsSave();
+  if(!db||!userId||!state.profile)return Promise.resolve();
+  return queue('profile',function(){return cdoc('profile').set(clean(state.profile));}).catch(function(){setCloud('error');toast(tr('save_fail'));});
+}
+function startCloud(){
+  var timer=setTimeout(function(){if(state.cloud==='connecting')setCloud('slow');},10000);
+  db.collection('data/users/'+userId).onSnapshot(function(snap){
+    var cached=snap.metadata.fromCache;
+    if(cached&&snap.empty)return;
+    if(!cached){clearTimeout(timer);setCloud('ok');}
+    if(!cached&&snap.empty&&hasLocal()){
+      Object.keys(state.days).forEach(function(k){persistDay(k);});
+      persistProfile();
+      return;
+    }
+    var days={},profile=null;
+    snap.docs.forEach(function(d){
+      var x=clean(d.data()||{}); /* snapshot data is frozen: work on a plain copy so entries can be added and removed */
+      if(d.id==='profile')profile=x;
+      else if(d.id.indexOf('d-')===0)days[d.id.slice(2)]={entries:Array.isArray(x.entries)?x.entries:[],weight:x.weight>0?x.weight:undefined};
+    });
+    state.days=days;state.profile=profile;lsSave();
+    if(!state.touched)state.draft=draftFrom(profile);
+    if(state.tab!=='profil'||!state.touched)render();
+  },function(){clearTimeout(timer);setCloud('error');});
+}
+
+/* ---------- data ---------- */
+function totals(k){var d=state.days[k],t={k:0,p:0,c:0,f:0};((d&&d.entries)||[]).forEach(function(e){t.k+=+e.k||0;t.p+=+e.p||0;t.c+=+e.c||0;t.f+=+e.f||0;});return t;}
+function hasEntries(k){var d=state.days[k];return !!(d&&d.entries&&d.entries.length);}
+function target(){return state.profile&&state.profile.target?state.profile.target:null;}
+function draftFrom(p){
+  var d={sex:'L',age:'',weight:'',height:'',activity:'ringan',goal:'turun',pace:'sederhana'};
+  if(p){['sex','age','weight','height','activity','goal','pace'].forEach(function(f){if(p[f]!=null)d[f]=p[f];});}
+  return d;
+}
+function mealNow(){var h=new Date().getHours();if(h>=5&&h<11)return 'sarapan';if(h>=11&&h<15)return 'tengahari';if(h>=15&&h<18)return 'snek';if(h>=18&&h<23)return 'malam';return 'snek';}
+function dayLabel(k){var d=fromKey(k);return tr('days')[d.getDay()]+', '+d.getDate()+' '+MSHORT_(d.getMonth())+' '+d.getFullYear();}
+
+/* ---------- toast ---------- */
+function toast(msg,act){
+  var el=$('#toast');
+  el.innerHTML='<span>'+esc(msg)+'</span>'+(act?'<button data-act="'+act.id+'">'+esc(act.label)+'</button>':'');
+  el.hidden=false;clearTimeout(toastT);
+  toastT=setTimeout(function(){el.hidden=true;},act?6500:3200);
+}
+
+/* ---------- render: log ---------- */
+var CAM='<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2.5h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+var X='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+var CH_L='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+var CH_R='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+
+function entryHtml(e){
+  var th=/^data:image\/(jpeg|png);base64,[A-Za-z0-9+\/=]+$/.test(e.th||'')?'<img class="thumb" src="'+e.th+'" alt="">':'<div class="thumb">'+esc((e.name||'?').trim().charAt(0).toUpperCase())+'</div>';
+  return '<div class="entry">'+th+'<div><div class="nm">'+esc(e.name)+'</div><div class="sub">'+(e.portion?esc(e.portion)+'<br>':'')+tr('prot')+' '+r1(e.p)+' · '+tr('carb')+' '+r1(e.c)+' · '+tr('fat')+' '+r1(e.f)+' g</div></div><div class="kc2">'+fmt(e.k)+'<small>kcal</small><button class="link" data-act="del" data-id="'+esc(e.id)+'">'+esc(tr('del'))+'</button></div></div>';
+}
+function renderLog(){
+  var k=state.date,t=totals(k),tg=target(),tk=todayKey();
+  var sub=k===tk?tr('today'):(k===keyOf(new Date(Date.now()-864e5))?tr('yesterday'):'');
+  var rem,pct=0,over=false;
+  if(tg){var diff=tg.kcal-t.k;over=diff<0;pct=Math.min(100,t.k/tg.kcal*100);rem='<div class="rem'+(over?' over':'')+'">'+esc(over?tr('over',fmt(-diff)):tr('left',fmt(diff)))+'<small>'+esc(tr('ofkcal',fmt(tg.kcal)))+'</small></div>';}
+  else rem='<div class="rem"><small>'+esc(tr('nogoal'))+'</small></div>';
+  var macros=[[tr('protein'),t.p,tg&&tg.protein,'var(--protein)'],[tr('carbs'),t.c,tg&&tg.carbs,'var(--carb)'],[tr('fats'),t.f,tg&&tg.fat,'var(--fat)']].map(function(m){
+    var w=m[2]?Math.min(100,m[1]/m[2]*100):0;
+    return '<div class="mrow"><b>'+esc(m[0])+'</b><div class="bar"><i style="width:'+w+'%;background:'+m[3]+'"></i></div><div class="g">'+fmt(m[1])+(m[2]?' <span>/ '+fmt(m[2])+' g</span>':' <span>g</span>')+'</div></div>';
+  }).join('');
+  var list='';
+  var es=(state.days[k]&&state.days[k].entries)||[];
+  MEALKEYS.forEach(function(mk){
+    var arr=es.filter(function(e){return (e.meal||'snek')===mk;});
+    if(!arr.length)return;
+    var sum=arr.reduce(function(a,e){return a+(+e.k||0);},0);
+    list+='<section class="sect"><h3><span>'+esc(tr('meal_'+mk))+'</span><span>'+fmt(sum)+' kcal</span></h3>'+arr.map(entryHtml).join('')+'</section>';
+  });
+  if(!es.length)list='<div class="empty">'+esc(tr('empty'))+'</div>';
+  $('#view').innerHTML=
+   '<div class="datebar"><button class="icon-btn" data-act="prev-day" aria-label="'+esc(tr('prevday'))+'">'+CH_L+'</button><div class="d"><b>'+esc(dayLabel(k))+'</b><span>'+(sub?esc(sub):'&nbsp;')+'</span></div><button class="icon-btn" data-act="next-day" aria-label="'+esc(tr('nextday'))+'"'+(k>=tk?' disabled':'')+'>'+CH_R+'</button></div>'+
+   '<section class="label" aria-label="'+esc(tr('label_aria'))+'"><div class="ttl">'+esc(tr('label_ttl'))+'<small>'+esc(tr('label_small'))+'</small></div>'+
+   '<div class="kc"><div><span class="n">'+fmt(t.k)+'</span><span class="u">kcal</span></div>'+rem+'</div>'+
+   (tg?'<div class="gauge'+(over?' over':'')+'" role="img" aria-label="'+esc(tr('gauge',Math.round(pct)))+'"><i style="width:'+pct+'%"></i></div>':'')+
+   '<div class="rows">'+macros+'</div></section>'+
+   (tg?'':'<div class="banner"><span>'+esc(tr('banner'))+'</span><button class="btn" data-act="tab" data-tab="profil">'+esc(tr('setgoal'))+'</button></div>')+
+   '<div class="actions one"><button class="btn primary" data-act="add-manual">'+esc(tr('manual'))+'</button></div>'+
+   list;
+}
+
+/* ---------- render: calendar ---------- */
+function dayStatus(k){
+  if(!hasEntries(k))return 'none';
+  var tg=target();if(!tg)return 'some';
+  var r=totals(k).k/tg.kcal;
+  if(r>1.05)return 'over';
+  if(r<0.6)return 'low';
+  return 'ok';
+}
+function renderCal(){
+  var y=state.cal.y,m=state.cal.m,off=(new Date(y,m,1).getDay()+6)%7,dim=new Date(y,m+1,0).getDate(),tk=todayKey();
+  var cells='',logged=0,sum=0,ok=0,tg=target();
+  var mname=tr('months')[m];
+  for(var i=0;i<off;i++)cells+='<div></div>';
+  for(var d=1;d<=dim;d++){
+    var k=y+'-'+pad(m+1)+'-'+pad(d),st=dayStatus(k),t=totals(k);
+    if(st!=='none'){logged++;sum+=t.k;if(st==='ok')ok++;}
+    cells+='<button class="day '+st+(k===tk?' today':'')+'" data-act="cal-day" data-date="'+k+'"'+(k>tk?' disabled':'')+' aria-label="'+d+' '+esc(mname)+(st!=='none'?', '+fmt(t.k)+' kcal':'')+'"><span class="num">'+d+'</span><span class="kk">'+(st!=='none'?fmt(t.k):'')+'</span></button>';
+  }
+  var cur=new Date();var atNow=(y===cur.getFullYear()&&m===cur.getMonth());
+  $('#view').innerHTML=
+   '<div class="mtitle"><button class="icon-btn" data-act="cal-prev" aria-label="'+esc(tr('prevmon'))+'">'+CH_L+'</button><b>'+esc(mname)+' '+y+'</b><button class="icon-btn" data-act="cal-next" aria-label="'+esc(tr('nextmon'))+'"'+(atNow?' disabled':'')+'>'+CH_R+'</button></div>'+
+   '<div class="cal">'+tr('wd').map(function(w){return '<div class="wd">'+esc(w)+'</div>';}).join('')+cells+'</div>'+
+   (tg?'<div class="legend"><span><i class="ok"></i>'+esc(tr('lg_ok'))+'</span><span><i class="over"></i>'+esc(tr('lg_over'))+'</span><span><i class="low"></i>'+esc(tr('lg_low'))+'</span></div>':'<div class="note">'+esc(tr('cal_nogoal'))+'</div>')+
+   '<div class="stats"><div><b>'+logged+'</b><span>'+esc(tr('st_days'))+'</span></div><div><b>'+(logged?fmt(sum/logged):'–')+'</b><span>'+esc(tr('st_avg'))+'</span></div><div><b>'+(tg?ok:'–')+'</b><span>'+esc(tr('st_ok'))+'</span></div></div>'+
+   '<p class="note">'+esc(tr('cal_hint'))+'</p>';
+}
+
+/* ---------- render: profile ---------- */
+function segHtml(f,opts,cur){return '<div class="seg" role="group">'+opts.map(function(o){return '<button type="button" data-act="seg" data-f="'+f+'" data-v="'+o[0]+'" aria-pressed="'+(cur===o[0])+'">'+esc(o[1])+'</button>';}).join('')+'</div>';}
+function resultHtml(){
+  var r=calc(state.draft);
+  if(!r)return '<p class="note">'+esc(tr('fillin'))+'</p>';
+  var lose=state.draft.goal==='turun';
+  var wk=r.deficit>0?Math.round(r.deficit*7/7700*100)/100:0;
+  return '<section class="label"><div class="ttl">'+esc(tr('goal_ttl'))+'<small>'+esc(lose?tr('lose'):tr('keep'))+'</small></div>'+
+   '<div class="kc"><div><span class="n">'+fmt(r.target)+'</span><span class="u">kcal</span></div><div class="rem"><small>'+esc(tr('perday'))+'</small></div></div>'+
+   '<div class="rows"><div class="mrow"><b>'+esc(tr('protein'))+'</b><div class="bar"><i style="width:100%;background:var(--protein)"></i></div><div class="g">'+r.protein+' <span>g</span></div></div>'+
+   '<div class="mrow"><b>'+esc(tr('carbs'))+'</b><div class="bar"><i style="width:100%;background:var(--carb)"></i></div><div class="g">'+r.carbs+' <span>g</span></div></div>'+
+   '<div class="mrow"><b>'+esc(tr('fats'))+'</b><div class="bar"><i style="width:100%;background:var(--fat)"></i></div><div class="g">'+r.fat+' <span>g</span></div></div></div>'+
+   '<div class="sub2">'+esc(tr('sub2',fmt(r.bmr),fmt(r.tdee))+(r.deficit>0?tr('sub2d',fmt(r.deficit),wk):''))+'</div></section>'+
+   (r.floored?'<div class="warnbox">'+esc(tr('floored',fmt(r.floor)))+'</div>':'')+
+   '<button class="btn primary block" data-act="save-profile">'+esc(tr('save_goal'))+'</button>';
+}
+function weightPoints(){return Object.keys(state.days).filter(function(k){return state.days[k]&&state.days[k].weight>0;}).sort().slice(-60).map(function(k){return {k:k,w:state.days[k].weight};});}
+function weightChart(){
+  var pts=weightPoints();
+  if(pts.length<2)return '<p class="note">'+esc(tr('chart_need'))+'</p>';
+  var W=320,H=140,L=38,R=40,T=12,B=24;
+  var ws=pts.map(function(p){return p.w;}),lo=Math.min.apply(null,ws),hi=Math.max.apply(null,ws);
+  if(hi-lo<1){lo-=0.5;hi+=0.5;}else{var pd=(hi-lo)*0.15;lo-=pd;hi+=pd;}
+  var x=function(i){return L+(W-L-R)*(i/(pts.length-1));},y=function(w){return T+(H-T-B)*(1-(w-lo)/(hi-lo));};
+  var line=pts.map(function(p,i){return x(i).toFixed(1)+','+y(p.w).toFixed(1);}).join(' ');
+  var last=pts[pts.length-1],first=pts[0];
+  var fd=fromKey(first.k),ld=fromKey(last.k);
+  var delta=r1(last.w-first.w);
+  var since=fd.getDate()+' '+MSHORT_(fd.getMonth());
+  return '<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(tr('chart_aria'))+'">'+
+   '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(hi)+'" y2="'+y(hi)+'" stroke="var(--line)" stroke-width="1"/>'+
+   '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(lo)+'" y2="'+y(lo)+'" stroke="var(--line)" stroke-width="1"/>'+
+   '<text x="'+(L-6)+'" y="'+(y(hi)+4)+'" text-anchor="end">'+r1(hi)+'</text><text x="'+(L-6)+'" y="'+(y(lo)+4)+'" text-anchor="end">'+r1(lo)+'</text>'+
+   '<polyline points="'+line+'" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'+
+   '<circle cx="'+x(pts.length-1)+'" cy="'+y(last.w)+'" r="4.5" fill="var(--accent)"/>'+
+   '<text x="'+(x(pts.length-1)+8)+'" y="'+(y(last.w)+4)+'" style="font-weight:700">'+r1(last.w)+'</text>'+
+   '<text x="'+L+'" y="'+(H-6)+'">'+since+'</text><text x="'+(W-R)+'" y="'+(H-6)+'" text-anchor="end">'+ld.getDate()+' '+MSHORT_(ld.getMonth())+'</text></svg>'+
+   '<p class="note">'+esc(tr('chart_delta',(delta>0?'+':'')+delta,since))+'</p>';
+}
+function renderProfile(){
+  var f=state.draft,tw=state.days[todayKey()]&&state.days[todayKey()].weight;
+  var store=tr(state.cloud==='ok'?'store_ok':(state.cloud==='local'?'store_local':(state.cloud==='error'||state.cloud==='slow'?'store_bad':'store_wait')));
+  $('#view').innerHTML=
+   '<h2 class="sec">'+esc(tr('prof_title'))+'</h2>'+
+   '<div class="form">'+
+   '<div class="field"><span class="lbl">'+esc(tr('sex'))+'</span>'+segHtml('sex',[['L',tr('male')],['P',tr('female')]],f.sex)+'</div>'+
+   '<div class="grid3"><div class="field"><label for="pf-age">'+esc(tr('age'))+'</label><input class="in" id="pf-age" inputmode="numeric" value="'+esc(f.age)+'" placeholder="30"></div>'+
+   '<div class="field"><label for="pf-weight">'+esc(tr('weight'))+'</label><input class="in" id="pf-weight" inputmode="decimal" value="'+esc(f.weight)+'" placeholder="75"></div>'+
+   '<div class="field"><label for="pf-height">'+esc(tr('height'))+'</label><input class="in" id="pf-height" inputmode="numeric" value="'+esc(f.height)+'" placeholder="170"></div></div>'+
+   '<div class="field"><label for="pf-act">'+esc(tr('activity'))+'</label><select class="in" id="pf-act">'+ACTKEYS.map(function(a){return '<option value="'+a+'"'+(f.activity===a?' selected':'')+'>'+esc(tr('act_'+a))+'</option>';}).join('')+'</select></div>'+
+   '<div class="field"><span class="lbl">'+esc(tr('goal'))+'</span>'+segHtml('goal',[['turun',tr('lose')],['kekal',tr('keep')]],f.goal)+'</div>'+
+   '<div class="field" id="paceField"'+(f.goal==='turun'?'':' hidden')+'><span class="lbl">'+esc(tr('rate'))+'</span>'+segHtml('pace',[['perlahan',tr('slow')],['sederhana',tr('mod')]],f.pace)+'</div>'+
+   '</div>'+
+   '<div class="form" id="result">'+resultHtml()+'</div>'+
+   '<h2 class="sec">'+esc(tr('body_weight'))+'</h2>'+
+   '<div class="wrow"><div class="field"><label for="wt">'+esc(tr('today_weight'))+'</label><input class="in" id="wt" inputmode="decimal" value="'+(tw?esc(tw):'')+'" placeholder="74.5"></div><button class="btn" style="align-self:end" data-act="save-weight">'+esc(tr('save'))+'</button></div>'+
+   weightChart()+
+   '<p class="note">'+esc(store)+'</p>'+
+   '<p class="note">'+esc(tr('disclaimer'))+'</p>';
+}
+
+function render(){
+  document.querySelectorAll('.tabs button').forEach(function(b){if(b.dataset.tab===state.tab)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');});
+  if(state.tab==='log')renderLog();else if(state.tab==='kal')renderCal();else renderProfile();
+}
+
+/* ---------- add-food sheet ---------- */
+function cur(it){return {k:it.base.k*it.mult,p:it.base.p*it.mult,c:it.base.c*it.mult,f:it.base.f*it.mult};}
+function sheetTotals(){var t={k:0,p:0,c:0,f:0};S.items.forEach(function(it){var v=cur(it);t.k+=v.k;t.p+=v.p;t.c+=v.c;t.f+=v.f;});return t;}
+function totalHtml(){var t=sheetTotals();return esc(tr('total'))+' '+fmt(t.k)+' kcal <span>'+esc(tr('prot'))+' '+r1(t.p)+' · '+esc(tr('carb'))+' '+r1(t.c)+' · '+esc(tr('fat'))+' '+r1(t.f)+' g</span>';}
+function itemHtml(it,i){
+  var v=cur(it);
+  return '<div class="item"><input class="nameinp" data-i="'+i+'" value="'+esc(it.name)+'" placeholder="'+esc(tr('food_name'))+'" aria-label="'+esc(tr('food_name'))+'" maxlength="60">'+
+   (it.portion?'<div class="note">'+esc(tr('estimate'))+esc(it.portion)+'</div>':'')+
+   '<div class="chips" role="group" aria-label="'+esc(tr('portion_size'))+'">'+MULTS.map(function(m){return '<button type="button" class="chip" data-act="mult" data-i="'+i+'" data-m="'+m[0]+'" aria-pressed="'+(it.mult===m[0])+'">'+m[1]+'</button>';}).join('')+'</div>'+
+   '<div class="nums">'+[['k','Kcal',v.k],['p',tr('n_prot'),v.p],['c',tr('n_carb'),v.c],['f',tr('n_fat'),v.f]].map(function(x){return '<label>'+esc(x[1])+'<input class="numinp" inputmode="decimal" data-i="'+i+'" data-k="'+x[0]+'" value="'+r1(x[2])+'"></label>';}).join('')+'</div>'+
+   '<button type="button" class="link" data-act="rm-item" data-i="'+i+'">'+esc(tr('rm_item'))+'</button></div>';
+}
+function foodListHtml(){
+  var toks=S.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  var list=[];
+  FOODS.forEach(function(f,i){
+    if(S.cat!=='all'&&f.cat!==S.cat)return;
+    var hay=(f.n+' '+f.e).toLowerCase();
+    for(var j=0;j<toks.length;j++)if(hay.indexOf(toks[j])<0)return;
+    list.push({f:f,i:i});
+  });
+  if(!list.length)return '<p class="note">'+esc(tr('nomatch'))+'</p>';
+  var showHead=S.cat==='all'&&!toks.length,last='',h='';
+  list.forEach(function(o){
+    if(showHead&&o.f.cat!==last){last=o.f.cat;h+='<h3 class="cathead">'+esc(tr('cat_'+last))+'</h3>';}
+    h+='<button type="button" class="pickrow" data-act="pick" data-i="'+o.i+'"><span><b>'+esc(foodName(o.f))+'</b><small>'+esc(foodPortion(o.f))+'</small></span><em>'+kcOf(o.f)+' kcal</em></button>';
+  });
+  return h;
+}
+function catBarHtml(){
+  return '<div class="catbar" role="group" aria-label="'+esc(tr('cat_aria'))+'">'+['all'].concat(CATS).map(function(c){return '<button type="button" class="chip" data-act="cat" data-v="'+c+'" aria-pressed="'+(S.cat===c)+'">'+esc(tr('cat_'+c))+'</button>';}).join('')+'</div>';
+}
+function renderSheet(){
+  var el=$('#sheet'),pn=$('#panel');
+  if(!S.open){el.hidden=true;document.body.style.overflow='';return;}
+  el.hidden=false;document.body.style.overflow='hidden';
+  var head=function(ttl){return '<div class="phead"><h2>'+esc(ttl)+'</h2><button class="icon-btn" data-act="sheet-close" aria-label="'+esc(tr('close'))+'">'+X+'</button></div>';};
+  var prev=S.preview?'<img class="prev" src="'+S.preview+'" alt="'+esc(tr('photo_alt'))+'">':'';
+  var h='';
+  pn.className='panel'+(S.mode==='pick'?' tall':'');
+  if(S.mode==='busy'){
+    h=head(tr('busy_ttl'))+prev+'<div class="busy"><div class="spin"></div><p>'+esc(tr('busy_txt'))+'</p></div><button class="btn block" data-act="sheet-close">'+esc(tr('cancel'))+'</button>';
+  }else if(S.mode==='error'){
+    var ek=ERRK[S.err]?S.err:'upstream_error';
+    h=head(tr('err_ttl'))+prev+'<p style="margin:0">'+esc(tr('err_'+ek))+'</p>'+(S.note?'<p class="note" style="margin:0">'+esc(S.note)+'</p>':'')+
+      '<div class="btnrow">'+(RETRY[S.err]&&S.blob?'<button class="btn" data-act="retry">'+esc(tr('retry'))+'</button>':'<button class="btn" data-act="sheet-close">'+esc(tr('close'))+'</button>')+'<button class="btn primary" data-act="to-pick">'+esc(tr('pick_manual'))+'</button></div>';
+  }else if(S.mode==='pick'){
+    h='<div class="pickhead">'+head(tr('add_food'))+'<input class="in" id="q" type="search" placeholder="'+esc(tr('search_ph'))+'" aria-label="'+esc(tr('search_aria'))+'" value="'+esc(S.q)+'" autocomplete="off">'+catBarHtml()+'</div>'+
+      '<div class="foodlist" id="foodlist">'+foodListHtml()+'</div>'+
+      '<p class="note" style="margin:0">'+esc(tr('pick_note'))+'</p>'+
+      '<div class="pickfoot"><div class="btnrow"><button class="btn" data-act="blank">'+esc(tr('own'))+'</button>'+(S.items.length?'<button class="btn primary" data-act="to-edit">'+esc(tr('back',S.items.length))+'</button>':'<button class="btn" data-act="sheet-close">'+esc(tr('cancel'))+'</button>')+'</div></div>';
+  }else if(S.mode==='edit'){
+    var conf=S.src==='foto'&&S.conf?'<p class="note" style="margin:0">'+tr('conf',esc(tr('conf_'+S.conf)),esc(S.note))+'</p>':'';
+    h=head(S.src==='foto'?tr('review_est'):tr('review_food'))+(S.src==='foto'?prev:'')+conf+
+      S.items.map(itemHtml).join('')+
+      '<button class="btn block" data-act="to-pick">'+esc(tr('add_more'))+'</button>'+
+      '<div class="field"><label for="mealSel">'+esc(tr('meal'))+'</label><select class="in" id="mealSel">'+MEALKEYS.map(function(mk){return '<option value="'+mk+'"'+(S.meal===mk?' selected':'')+'>'+esc(tr('meal_'+mk))+'</option>';}).join('')+'</select></div>'+
+      '<div class="total" id="sheetTotal">'+totalHtml()+'</div>'+
+      '<div class="btnrow"><button class="btn" data-act="sheet-close">'+esc(tr('cancel'))+'</button><button class="btn primary" data-act="save-sheet">'+esc(tr('save_log'))+'</button></div>';
+  }
+  pn.innerHTML=h;
+}
+function openSheet(mode){S.open=true;S.mode=mode;renderSheet();}
+function closeSheet(){aid++;if(ctl){try{ctl.abort();}catch(e){}ctl=null;}S.open=false;S.items=[];S.preview=null;S.th=null;S.blob=null;S.note='';S.conf='';S.err='';S.q='';S.cat='all';renderSheet();}
+function sheetError(code,note){S.mode='error';S.err=code;S.note=note||'';renderSheet();}
+
+function normItem(x){
+  var n=function(v){v=Number(v);return isFinite(v)&&v>=0?Math.min(v,5000):0;};
+  var p=n(x.protein_g),c=n(x.carbs_g),f=n(x.fat_g),k=n(x.kcal),calcK=4*p+4*c+9*f;
+  if(!k||(calcK>0&&Math.abs(k-calcK)/Math.max(k,1)>0.25))k=calcK||k;
+  return {name:String(x.name||tr('food_default')).slice(0,60),portion:String(x.portion||'').slice(0,80),base:{k:k,p:p,c:c,f:f},mult:1,kAuto:true};
+}
+
+/* ---------- photo analysis ---------- */
+async function prep(file){
+  var url=URL.createObjectURL(file);
+  try{
+    var img=await new Promise(function(res,rej){var i=new Image();i.onload=function(){res(i);};i.onerror=function(){rej(new Error('decode'));};i.src=url;});
+    var iw=img.naturalWidth,ih=img.naturalHeight;
+    if(!iw||!ih)throw new Error('size');
+    var draw=function(max){var s=Math.min(1,max/Math.max(iw,ih));var c=document.createElement('canvas');c.width=Math.max(1,Math.round(iw*s));c.height=Math.max(1,Math.round(ih*s));c.getContext('2d').drawImage(img,0,0,c.width,c.height);return c;};
+    var big=draw(1280);
+    var blob=await new Promise(function(r){big.toBlob(r,'image/jpeg',0.85);});
+    if(!blob)throw new Error('blob');
+    var sq=document.createElement('canvas');sq.width=96;sq.height=96;
+    var m=Math.min(iw,ih);sq.getContext('2d').drawImage(img,(iw-m)/2,(ih-m)/2,m,m,0,0,96,96);
+    return {blob:blob,th:sq.toDataURL('image/jpeg',0.6),preview:draw(560).toDataURL('image/jpeg',0.7)};
+  }finally{URL.revokeObjectURL(url);}
+}
+async function runAnalysis(){
+  var my=++aid;
+  S.mode='busy';S.note='';renderSheet();
+  var s=await samplePromise;
+  if(my!==aid)return;
+  if(!s){sheetError('not_declared');return;}
+  var lim=null;try{lim=await s.limits();}catch(e){}
+  if(my!==aid)return;
+  if(!lim||!lim.images){sheetError('images_unavailable');return;}
+  ctl=new AbortController();
+  try{
+    var out=await s.json(buildPrompt(),{images:S.blob,signal:ctl.signal});
+    if(my!==aid)return;
+    ctl=null;
+    var items=out&&Array.isArray(out.items)?out.items.slice(0,6).map(normItem):[];
+    if(!out||out.is_food===false||!items.length){sheetError('nofood',out&&typeof out.note==='string'?out.note.slice(0,160):'');return;}
+    S.items=items;S.src='foto';S.conf=CONFMAP[out.confidence]||'';
+    S.note=typeof out.note==='string'?out.note.slice(0,200):'';S.meal=mealNow();S.mode='edit';renderSheet();
+  }catch(e){
+    if(my!==aid)return;
+    ctl=null;
+    if(e&&e.code==='cancelled')return;
+    sheetError(e&&e.code&&ERRK[e.code]?e.code:'upstream_error');
+  }
+}
+async function analyse(file){
+  aid++;S.items=[];S.src='foto';S.preview=null;S.th=null;S.blob=null;S.note='';S.conf='';
+  S.open=true;S.mode='busy';renderSheet();
+  var my=aid;
+  var pre;
+  try{pre=await prep(file);}catch(e){if(my===aid)sheetError('image_rejected');return;}
+  if(my!==aid)return;
+  S.preview=pre.preview;S.th=pre.th;S.blob=pre.blob;
+  runAnalysis();
+}
+
+/* ---------- actions ---------- */
+function saveSheet(){
+  var k=state.date;
+  var day=state.days[k]||(state.days[k]={entries:[]});
+  if(!day.entries)day.entries=[];
+  var base=k===todayKey()?new Date():new Date(fromKey(k).getTime()+12*36e5);
+  var n=0;
+  S.items.forEach(function(it,i){
+    var v=cur(it);
+    var mp=MULTS.filter(function(m){return m[0]===it.mult;})[0];
+    var e={id:newId(),t:base.toISOString(),meal:S.meal,name:(it.name||'').trim()||tr('food_default'),portion:(it.mult!==1&&mp?mp[1]+' ':'')+(it.portion||''),k:Math.round(v.k),p:r1(v.p),c:r1(v.c),f:r1(v.f),src:S.src};
+    e.portion=e.portion.trim();
+    if(i===0&&S.src==='foto'&&S.th)e.th=S.th;
+    day.entries.push(e);n++;
+  });
+  var t=sheetTotals();
+  persistDay(k);closeSheet();render();
+  toast(tr('saved_n',n,fmt(t.k)));
+}
+function delEntry(id){
+  var k=state.date,day=state.days[k];if(!day)return;
+  var i=day.entries.findIndex(function(e){return e.id===id;});if(i<0)return;
+  lastDel={k:k,e:day.entries[i],i:i};
+  day.entries.splice(i,1);
+  persistDay(k);render();
+  toast(tr('deleted'),{id:'undo',label:tr('undo')});
+}
+function undoDel(){
+  if(!lastDel)return;
+  var d=state.days[lastDel.k]||(state.days[lastDel.k]={entries:[]});
+  if(!d.entries)d.entries=[];
+  d.entries.splice(Math.min(lastDel.i,d.entries.length),0,lastDel.e);
+  persistDay(lastDel.k);lastDel=null;$('#toast').hidden=true;render();
+}
+function shiftDay(n){var d=fromKey(state.date);d.setDate(d.getDate()+n);var k=keyOf(d);if(k>todayKey())return;state.date=k;render();window.scrollTo(0,0);}
+function saveProfile(){
+  var r=calc(state.draft);if(!r)return;
+  var f=state.draft;
+  state.profile={sex:f.sex,age:+f.age,weight:+f.weight,height:+f.height,activity:f.activity,goal:f.goal,pace:f.pace,bmr:r.bmr,tdee:r.tdee,target:{kcal:r.target,protein:r.protein,carbs:r.carbs,fat:r.fat},updated:new Date().toISOString()};
+  state.touched=false;
+  persistProfile();toast(tr('goal_saved',fmt(r.target)));
+}
+function saveWeight(){
+  var v=parseFloat(String($('#wt').value).replace(',','.'));
+  if(!(v>=20&&v<=400)){toast(tr('weight_bad'));return;}
+  var k=todayKey(),d=state.days[k]||(state.days[k]={entries:[]});
+  d.weight=r1(v);if(!d.entries)d.entries=[];
+  persistDay(k);render();toast(tr('weight_saved'));
+}
+
+/* ---------- language switch ---------- */
+function applyStatic(){
+  document.documentElement.lang=LANG==='en'?'en':'ms';
+  document.querySelectorAll('[data-t]').forEach(function(el){el.textContent=tr(el.dataset.t);});
+  document.querySelectorAll('[data-ta]').forEach(function(el){el.setAttribute('aria-label',tr(el.dataset.ta));});
+  document.querySelectorAll('.lang button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.lang===LANG));});
+  setCloud(state.cloud);
+}
+function setLang(v){
+  if(v!=='ms'&&v!=='en')return;
+  if(v!==LANG){LANG=v;try{localStorage.setItem(LSL,v);}catch(e){}}
+  applyStatic();render();renderSheet();
+  $('#toast').hidden=true;
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-act]');if(!b||b.disabled)return;
+  var a=b.dataset.act,ds=b.dataset;
+  if(a==='tab'){state.tab=ds.tab;render();window.scrollTo(0,0);}
+  else if(a==='lang')setLang(ds.lang);
+  else if(a==='prev-day')shiftDay(-1);
+  else if(a==='next-day')shiftDay(1);
+  else if(a==='cal-prev'){var c=state.cal;c.m--;if(c.m<0){c.m=11;c.y--;}render();}
+  else if(a==='cal-next'){var c2=state.cal;c2.m++;if(c2.m>11){c2.m=0;c2.y++;}render();}
+  else if(a==='cal-day'){state.date=ds.date;state.tab='log';render();window.scrollTo(0,0);}
+  else if(a==='add-manual'){S.items=[];S.src='manual';S.q='';S.cat='all';S.meal=mealNow();S.th=null;S.preview=null;openSheet('pick');}
+  else if(a==='sheet-close')closeSheet();
+  else if(a==='to-pick'){S.mode='pick';S.q='';renderSheet();}
+  else if(a==='to-edit'){S.mode='edit';renderSheet();}
+  else if(a==='retry')runAnalysis();
+  else if(a==='cat'){
+    S.cat=ds.v;
+    b.parentNode.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b));});
+    $('#foodlist').innerHTML=foodListHtml();
+    $('#panel').scrollTop=0;
+  }
+  else if(a==='pick'){var f=FOODS[+ds.i];if(f){S.items.push({name:foodName(f),portion:foodPortion(f),base:{k:kcOf(f),p:f.p,c:f.c,f:f.f},mult:1,kAuto:true});S.mode='edit';renderSheet();}}
+  else if(a==='blank'){S.items.push({name:'',portion:'',base:{k:0,p:0,c:0,f:0},mult:1,kAuto:true});S.mode='edit';renderSheet();}
+  else if(a==='mult'){var it=S.items[+ds.i];if(it){it.mult=+ds.m;renderSheet();}}
+  else if(a==='rm-item'){S.items.splice(+ds.i,1);S.mode=S.items.length?'edit':'pick';renderSheet();}
+  else if(a==='save-sheet')saveSheet();
+  else if(a==='del')delEntry(ds.id);
+  else if(a==='undo')undoDel();
+  else if(a==='seg'){
+    state.draft[ds.f]=ds.v;state.touched=true;
+    b.parentNode.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b));});
+    if(ds.f==='goal')$('#paceField').hidden=ds.v!=='turun';
+    $('#result').innerHTML=resultHtml();
+  }
+  else if(a==='save-profile')saveProfile();
+  else if(a==='save-weight')saveWeight();
+});
+document.addEventListener('input',function(e){
+  var t=e.target;
+  if(t.id==='q'){S.q=t.value;$('#foodlist').innerHTML=foodListHtml();$('#panel').scrollTop=0;}
+  else if(t.classList.contains('nameinp')){var it=S.items[+t.dataset.i];if(it)it.name=t.value;}
+  else if(t.classList.contains('numinp')){
+    var i=+t.dataset.i,it2=S.items[i];if(!it2)return;
+    var key=t.dataset.k,val=parseFloat(String(t.value).replace(',','.'));if(!(val>=0))val=0;
+    it2.base[key]=val/(it2.mult||1);
+    if(key==='k')it2.kAuto=false;
+    else if(it2.kAuto!==false){
+      it2.base.k=4*it2.base.p+4*it2.base.c+9*it2.base.f;
+      var ki=document.querySelector('.numinp[data-i="'+i+'"][data-k="k"]');if(ki)ki.value=r1(it2.base.k*it2.mult);
+    }
+    $('#sheetTotal').innerHTML=totalHtml();
+  }
+  else if(t.id==='pf-age'||t.id==='pf-weight'||t.id==='pf-height'){
+    state.draft[t.id.slice(3)]=t.value.replace(',','.');state.touched=true;$('#result').innerHTML=resultHtml();
+  }
+});
+document.addEventListener('change',function(e){
+  var t=e.target;
+  if(t.id==='mealSel')S.meal=t.value;
+  else if(t.id==='pf-act'){state.draft.activity=t.value;state.touched=true;$('#result').innerHTML=resultHtml();}
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&S.open)closeSheet();
+  if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('label[for="photo"]')){e.preventDefault();$('#photo').click();}
+});
+$('#photo').addEventListener('change',function(e){
+  var f=e.target.files&&e.target.files[0];e.target.value='';
+  if(f)analyse(f);
+});
+
+/* ---------- start ---------- */
+function init(){
+  lsLoad();state.draft=draftFrom(state.profile);applyStatic();render();
+  var C=window.claude;
+  var use=function(n){return C&&typeof C.use==='function'?Promise.resolve(C.use(n)).catch(function(){return null;}):Promise.resolve(null);};
+  samplePromise=use('sample');
+  if(!C){setCloud('local');return;}
+  Promise.all([use('user'),use('db')]).then(async function(r){
+    try{userId=r[0]?await r[0].id():null;}catch(e){userId=null;}
+    db=r[1];
+    if(db&&userId)startCloud();else setCloud('local');
+  });
+}
+init();
+})();
+</script>
+</body>
+</html>
