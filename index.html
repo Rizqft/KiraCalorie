@@ -187,6 +187,10 @@ h2.sec{font-family:var(--display);font-size:20px;margin:0}
 .catbar{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
 .catbar .chip{flex:none;white-space:nowrap;min-height:40px}
 .cathead{margin:14px 0 2px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);font-weight:700}
+.entry.ex{grid-template-columns:minmax(0,1fr) auto}
+.check{display:flex;align-items:flex-start;gap:12px;min-height:44px;font-weight:600;cursor:pointer}
+.check input{flex:none;width:22px;height:22px;margin:0;accent-color:var(--accent)}
+.day.hasex .num::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin-left:4px;vertical-align:middle}
 @media (prefers-reduced-motion:reduce){.panel{animation:none}.spin{animation:none}}
 </style>
 
@@ -223,6 +227,7 @@ var kcOf=function(f){return Math.round(4*f.p+4*f.c+9*f.f);};
 var STANDALONE=true; /* standalone site: data stays in this browser, no photo analysis */
 
 /* ---------- language (Bahasa Malaysia / English) ---------- */
+var EB=false;try{EB=localStorage.getItem('kirakalori.eb')==='1';}catch(e){}
 var LSL='kirakalori.lang';
 var LANG='ms';
 try{var savedLang=localStorage.getItem(LSL);if(savedLang==='en'||savedLang==='ms')LANG=savedLang;}catch(e){}
@@ -249,7 +254,7 @@ ms:{
  prevday:'Hari sebelumnya',nextday:'Hari berikutnya',prevmon:'Bulan sebelumnya',nextmon:'Bulan berikutnya',
  lg_ok:'Dalam sasaran',lg_over:'Melebihi sasaran',lg_low:'Bawah 60% sasaran (mungkin belum lengkap)',
  cal_nogoal:'Tetapkan sasaran di Profil untuk melihat warna status setiap hari.',
- st_days:'Hari dicatat',st_avg:'Purata kcal',st_ok:'Dalam sasaran',cal_hint:'Tekan satu hari untuk lihat atau tambah catatan makanan hari itu.',
+ st_days:'Hari dicatat',st_avg:'Purata kcal',st_ok:'Dalam sasaran',cal_hint:'Tekan satu hari untuk lihat atau tambah catatan makanan hari itu. Titik hijau bermaksud ada senaman dicatat.',
  prof_title:'Profil dan sasaran',sex:'Jantina',male:'Lelaki',female:'Perempuan',age:'Umur',weight:'Berat (kg)',height:'Tinggi (cm)',
  activity:'Tahap aktiviti',
  act_sedentari:'Duduk sahaja (kerja pejabat, jarang bersenam)',act_ringan:'Ringan (bersenam 1–3 hari seminggu)',act_sederhana:'Sederhana (3–5 hari seminggu)',act_aktif:'Aktif (6–7 hari seminggu)',act_sangat:'Sangat aktif (kerja fizikal atau latihan dua kali sehari)',
@@ -288,6 +293,18 @@ ms:{
  goal_saved:function(k){return 'Sasaran disimpan: '+k+' kcal sehari';},
  weight_bad:'Masukkan berat antara 20 dan 400 kg',weight_saved:'Berat disimpan',
  food_default:'Makanan',
+ ex_title:'Senaman',ex_add:'Tambah senaman',ex_min:'min',ex_default:'Senaman',
+ exsum:function(b,n){return 'Dibakar '+b+' kcal · Bersih '+n+' kcal';},
+ ofkcal_eb:function(t,b){return 'daripada '+t+' + '+b+' kcal';},
+ ex_search_ph:'Cari jalan kaki, badminton, gim…',ex_search_aria:'Cari senaman',
+ ex_nomatch:'Tiada padanan. Cuba kata kunci lain, atau tekan "Isi sendiri" untuk masukkan nama dan kalori anda.',
+ ex_note_pick:'Nilai MET ialah anggaran purata. Kalori sebenar bergantung pada berat, intensiti dan kecergasan anda. Kiraan: MET × berat (kg) × jam.',
+ ex_per30:function(k){return '≈ '+k+' kcal / 30 min';},
+ ex_detail:'Butiran senaman',ex_name:'Nama senaman',ex_dur:'Tempoh (minit)',ex_weight:'Berat badan (kg)',ex_kcal_in:'Kalori dibakar (kcal)',
+ ex_est:function(k){return '≈ '+k+' kcal dibakar';},ex_need:'Isi tempoh dan berat badan dahulu.',ex_need_k:'Isi kalori dibakar dahulu.',
+ ex_save:'Simpan senaman',ex_saved:function(k){return 'Senaman disimpan, '+k+' kcal dibakar';},ex_deleted:'Senaman dipadam',
+ eb_label:'Tambah kalori senaman pada baki harian',
+ eb_note:'Mati secara lalai. Tahap aktiviti dalam sasaran anda sudah mengambil kira senaman biasa, jadi menambahnya lagi boleh membuatkan anda makan lebih daripada yang dirancang. Hidupkan jika senaman hari itu luar biasa.',
  err_not_granted:'Claude belum dibenarkan menganalisis gambar. Cuba lagi dan tekan benarkan bila diminta.',
  err_sampling_disabled:'Analisis gambar tidak tersedia untuk akaun ini. Anda boleh pilih makanan secara manual.',
  err_not_declared:'Analisis gambar hanya berfungsi bila halaman ini dibuka dalam Claude. Anda boleh pilih makanan secara manual.',
@@ -324,7 +341,7 @@ en:{
  prevday:'Previous day',nextday:'Next day',prevmon:'Previous month',nextmon:'Next month',
  lg_ok:'On target',lg_over:'Over target',lg_low:'Under 60% of goal (may be incomplete)',
  cal_nogoal:'Set your goal in Profile to see a status colour for each day.',
- st_days:'Days logged',st_avg:'Average kcal',st_ok:'On target',cal_hint:"Tap a day to view or add that day's food log.",
+ st_days:'Days logged',st_avg:'Average kcal',st_ok:'On target',cal_hint:"Tap a day to view or add that day's food log. A green dot means exercise was logged.",
  prof_title:'Profile and goal',sex:'Sex',male:'Male',female:'Female',age:'Age',weight:'Weight (kg)',height:'Height (cm)',
  activity:'Activity level',
  act_sedentari:'Sedentary (office job, rarely exercise)',act_ringan:'Light (exercise 1–3 days a week)',act_sederhana:'Moderate (3–5 days a week)',act_aktif:'Active (6–7 days a week)',act_sangat:'Very active (physical job or training twice a day)',
@@ -363,6 +380,18 @@ en:{
  goal_saved:function(k){return 'Goal saved: '+k+' kcal a day';},
  weight_bad:'Enter a weight between 20 and 400 kg',weight_saved:'Weight saved',
  food_default:'Food',
+ ex_title:'Exercise',ex_add:'Add exercise',ex_min:'min',ex_default:'Exercise',
+ exsum:function(b,n){return 'Burned '+b+' kcal · Net '+n+' kcal';},
+ ofkcal_eb:function(t,b){return 'of '+t+' + '+b+' kcal';},
+ ex_search_ph:'Search walking, badminton, gym…',ex_search_aria:'Search exercise',
+ ex_nomatch:'No match. Try another keyword, or tap "Enter my own" to add your own name and calories.',
+ ex_note_pick:'MET values are average estimates. Real calories depend on your weight, intensity and fitness. Formula: MET × weight (kg) × hours.',
+ ex_per30:function(k){return '≈ '+k+' kcal / 30 min';},
+ ex_detail:'Exercise details',ex_name:'Exercise name',ex_dur:'Duration (minutes)',ex_weight:'Body weight (kg)',ex_kcal_in:'Calories burned (kcal)',
+ ex_est:function(k){return '≈ '+k+' kcal burned';},ex_need:'Enter the duration and your weight first.',ex_need_k:'Enter the calories burned first.',
+ ex_save:'Save exercise',ex_saved:function(k){return 'Exercise saved, '+k+' kcal burned';},ex_deleted:'Exercise deleted',
+ eb_label:'Add exercise calories to the daily balance',
+ eb_note:"Off by default. The activity level in your goal already accounts for your usual exercise, so adding it again can lead you to eat more than planned. Turn it on when that day's exercise was unusual.",
  err_not_granted:'Claude has not been allowed to analyse photos yet. Try again and tap allow when asked.',
  err_sampling_disabled:'Photo analysis is not available for this account. You can pick food manually.',
  err_not_declared:'Photo analysis only works when this page is opened in Claude. You can pick food manually.',
@@ -587,6 +616,50 @@ var FOODS=FOOD_ROWS.map(function(r){return {cat:r[0],n:r[1],e:r[2]||r[1],s:r[3],
 var foodName=function(f){return LANG==='en'?f.e:f.n;};
 var foodPortion=function(f){return LANG==='en'?f.se:f.s;};
 
+/* ---------- exercise list ----------
+   Row: [Malay name, English name, Malay note, English note, MET]
+   Calories = MET x body weight (kg) x hours. Averages only. */
+var EXERCISES=[
+ ['Jalan kaki santai','Easy walk','sekitar 3 km/j','about 3 km/h',2.8],
+ ['Jalan pantas','Brisk walk','sekitar 5.5 km/j','about 5.5 km/h',4.3],
+ ['Mendaki bukit','Hiking','denai berbukit','hilly trail',6],
+ ['Naik turun tangga','Climbing stairs','santai hingga sederhana','easy to moderate',4],
+ ['Jogging','Jogging','sekitar 8 km/j','about 8 km/h',7],
+ ['Berlari','Running','sekitar 10 km/j','about 10 km/h',9.8],
+ ['Berlari laju','Fast running','sekitar 12 km/j','about 12 km/h',12],
+ ['Berbasikal santai','Easy cycling','bawah 16 km/j','under 16 km/h',4],
+ ['Berbasikal sederhana','Moderate cycling','16 hingga 19 km/j','16 to 19 km/h',6.8],
+ ['Berbasikal laju','Fast cycling','19 hingga 22 km/j','19 to 22 km/h',8],
+ ['Berenang santai','Easy swimming','kayuhan perlahan','slow laps',6],
+ ['Berenang laju','Fast swimming','kayuhan kuat','vigorous laps',9.8],
+ ['Badminton (santai)','Badminton (casual)','permainan rekreasi','recreational play',4.5],
+ ['Badminton (bersungguh-sungguh)','Badminton (competitive)','perlawanan atau latihan kuat','match or hard training',7],
+ ['Futsal atau bola sepak','Futsal or football','permainan umum','general play',7],
+ ['Bola keranjang','Basketball','permainan umum','general play',6.5],
+ ['Tenis','Tennis','permainan umum','general play',7.3],
+ ['Ping pong','Table tennis','permainan umum','general play',4],
+ ['Bola tampar (santai)','Volleyball (casual)','permainan rekreasi','recreational play',3],
+ ['Angkat beban (ringan hingga sederhana)','Weight training (light to moderate)','latihan gim biasa','typical gym session',3.5],
+ ['Angkat beban (berat)','Weight training (heavy)','set berat, rehat singkat','heavy sets, short rests',6],
+ ['Senaman berat badan','Bodyweight exercises','tekan tubi, sit-up, squat','push-ups, sit-ups, squats',3.8],
+ ['HIIT atau circuit','HIIT or circuit training','selang kuat dan rehat','hard and rest intervals',8],
+ ['Skipping','Skipping rope','sederhana','moderate pace',11.8],
+ ['Mesin dayung','Rowing machine','sederhana','moderate effort',7],
+ ['Mesin elips','Elliptical trainer','sederhana','moderate effort',5],
+ ['Aerobik','Aerobics','kelas aerobik','aerobics class',7.3],
+ ['Zumba atau menari','Zumba or dancing','kelas tarian','dance class',6.5],
+ ['Yoga','Yoga','hatha, santai','hatha, relaxed',2.5],
+ ['Pilates','Pilates','kelas biasa','regular class',3],
+ ['Regangan','Stretching','ringan','light',2.3],
+ ['Silat, taekwondo atau karate','Silat, taekwondo or karate','latihan atau sparring','training or sparring',10.3],
+ ['Mengemas rumah','Housework','menyapu, mengemop, mengemas','sweeping, mopping, tidying',3.3],
+ ['Berkebun','Gardening','kerja kebun umum','general garden work',3.8],
+ ['Bermain aktif dengan anak','Active play with kids','berlari dan bermain','running and playing',4]
+].map(function(r){return {n:r[0],e:r[1],d:r[2],de:r[3],met:r[4]};});
+var exName=function(a){return LANG==='en'?a.e:a.n;};
+var exDesc=function(a){return LANG==='en'?a.de:a.d;};
+
+
 var MEALKEYS=['sarapan','tengahari','snek','malam'];
 var MULTS=[[0.5,'½×'],[0.75,'¾×'],[1,'1×'],[1.25,'1¼×'],[1.5,'1½×'],[2,'2×']];
 var ACTKEYS=['sedentari','ringan','sederhana','aktif','sangat'];
@@ -610,12 +683,12 @@ function buildPrompt(){
 var LS='kirakalori.v1';
 var now0=new Date();
 var state={tab:'log',date:todayKey(),cal:{y:now0.getFullYear(),m:now0.getMonth()},profile:null,days:{},cloud:'connecting',draft:null,touched:false};
-var S={open:false,mode:'',items:[],meal:'sarapan',preview:null,th:null,blob:null,note:'',conf:'',err:'',q:'',cat:'all',src:'manual'};
+var S={open:false,mode:'',items:[],meal:'sarapan',preview:null,th:null,blob:null,note:'',conf:'',err:'',q:'',cat:'all',src:'manual',ex:null,exq:''};
 var db=null,userId=null,samplePromise=Promise.resolve(null),ctl=null,aid=0,lastDel=null,toastT=null,writeQ={};
 
 function lsLoad(){try{var j=JSON.parse(localStorage.getItem(LS)||'null');if(j){state.profile=j.profile||null;state.days=j.days||{};}}catch(e){}}
 function lsSave(){try{localStorage.setItem(LS,JSON.stringify({profile:state.profile,days:state.days}));}catch(e){}}
-function hasLocal(){return !!state.profile||Object.keys(state.days).some(function(k){var d=state.days[k];return d&&((d.entries&&d.entries.length)||d.weight);});}
+function hasLocal(){return !!state.profile||Object.keys(state.days).some(function(k){var d=state.days[k];return d&&((d.entries&&d.entries.length)||(d.exercises&&d.exercises.length)||d.weight);});}
 
 function setCloud(s){
   state.cloud=s;
@@ -631,8 +704,8 @@ function persistDay(k){
   if(!db||!userId)return Promise.resolve();
   return queue('d-'+k,function(){
     var d=state.days[k];
-    if(d&&((d.entries&&d.entries.length)||d.weight>0)){
-      var o={date:k,entries:d.entries||[]};if(d.weight>0)o.weight=d.weight;
+    if(d&&((d.entries&&d.entries.length)||(d.exercises&&d.exercises.length)||d.weight>0)){
+      var o={date:k,entries:d.entries||[]};if(d.exercises&&d.exercises.length)o.exercises=d.exercises;if(d.weight>0)o.weight=d.weight;
       return cdoc('d-'+k).set(clean(o));
     }
     return cdoc('d-'+k).delete();
@@ -658,7 +731,7 @@ function startCloud(){
     snap.docs.forEach(function(d){
       var x=clean(d.data()||{}); /* snapshot data is frozen: work on a plain copy so entries can be added and removed */
       if(d.id==='profile')profile=x;
-      else if(d.id.indexOf('d-')===0)days[d.id.slice(2)]={entries:Array.isArray(x.entries)?x.entries:[],weight:x.weight>0?x.weight:undefined};
+      else if(d.id.indexOf('d-')===0)days[d.id.slice(2)]={entries:Array.isArray(x.entries)?x.entries:[],exercises:Array.isArray(x.exercises)?x.exercises:[],weight:x.weight>0?x.weight:undefined};
     });
     state.days=days;state.profile=profile;lsSave();
     if(!state.touched)state.draft=draftFrom(profile);
@@ -669,6 +742,17 @@ function startCloud(){
 /* ---------- data ---------- */
 function totals(k){var d=state.days[k],t={k:0,p:0,c:0,f:0};((d&&d.entries)||[]).forEach(function(e){t.k+=+e.k||0;t.p+=+e.p||0;t.c+=+e.c||0;t.f+=+e.f||0;});return t;}
 function hasEntries(k){var d=state.days[k];return !!(d&&d.entries&&d.entries.length);}
+function hasEx(k){var d=state.days[k];return !!(d&&d.exercises&&d.exercises.length);}
+function burn(k){var d=state.days[k],s=0;((d&&d.exercises)||[]).forEach(function(e){s+=+e.kcal||0;});return s;}
+function eatBack(){return EB;}
+function bodyWeight(){
+  var tk=todayKey(),best=null,bk='';
+  Object.keys(state.days).forEach(function(k){var d=state.days[k];if(d&&d.weight>0&&k<=tk&&k>bk){bk=k;best=d.weight;}});
+  if(best)return best;
+  if(state.profile&&state.profile.weight>0)return state.profile.weight;
+  try{var w=parseFloat(localStorage.getItem('kirakalori.exw'));if(w>=20&&w<=400)return w;}catch(e){}
+  return null;
+}
 function target(){return state.profile&&state.profile.target?state.profile.target:null;}
 function draftFrom(p){
   var d={sex:'L',age:'',weight:'',height:'',activity:'ringan',goal:'turun',pace:'sederhana'};
@@ -691,16 +775,28 @@ var CAM='<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l
 var X='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 var CH_L='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
 var CH_R='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+var FLAME='<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3c.6 3.2 4.5 5 4.5 9.2a4.5 4.5 0 0 1-9 0c0-1.7.7-2.9 1.7-3.9.2 1.2.9 1.9 1.6 2.2C10.4 8.4 11 5.8 12 3z"/></svg>';
 
 function entryHtml(e){
   var th=/^data:image\/(jpeg|png);base64,[A-Za-z0-9+\/=]+$/.test(e.th||'')?'<img class="thumb" src="'+e.th+'" alt="">':'<div class="thumb">'+esc((e.name||'?').trim().charAt(0).toUpperCase())+'</div>';
   return '<div class="entry">'+th+'<div><div class="nm">'+esc(e.name)+'</div><div class="sub">'+(e.portion?esc(e.portion)+'<br>':'')+tr('prot')+' '+r1(e.p)+' · '+tr('carb')+' '+r1(e.c)+' · '+tr('fat')+' '+r1(e.f)+' g</div></div><div class="kc2">'+fmt(e.k)+'<small>kcal</small><button class="link" data-act="del" data-id="'+esc(e.id)+'">'+esc(tr('del'))+'</button></div></div>';
 }
+function exHtml(k){
+  var d=state.days[k],arr=(d&&d.exercises)||[];
+  if(!arr.length)return '';
+  return '<section class="sect"><h3><span>'+esc(tr('ex_title'))+'</span><span>'+fmt(burn(k))+' kcal</span></h3>'+arr.map(function(e){
+    var sub=[];
+    if(e.min)sub.push(e.min+' '+tr('ex_min'));
+    if(e.met)sub.push('MET '+e.met);
+    if(e.w)sub.push(r1(e.w)+' kg');
+    return '<div class="entry ex"><div><div class="nm">'+esc(e.name)+'</div><div class="sub">'+esc(sub.join(' · '))+'</div></div><div class="kc2">'+fmt(e.kcal)+'<small>kcal</small><button class="link" data-act="del-ex" data-id="'+esc(e.id)+'">'+esc(tr('del'))+'</button></div></div>';
+  }).join('')+'</section>';
+}
 function renderLog(){
-  var k=state.date,t=totals(k),tg=target(),tk=todayKey();
+  var k=state.date,t=totals(k),tg=target(),tk=todayKey(),burned=burn(k);
   var sub=k===tk?tr('today'):(k===keyOf(new Date(Date.now()-864e5))?tr('yesterday'):'');
   var rem,pct=0,over=false;
-  if(tg){var diff=tg.kcal-t.k;over=diff<0;pct=Math.min(100,t.k/tg.kcal*100);rem='<div class="rem'+(over?' over':'')+'">'+esc(over?tr('over',fmt(-diff)):tr('left',fmt(diff)))+'<small>'+esc(tr('ofkcal',fmt(tg.kcal)))+'</small></div>';}
+  if(tg){var eb=eatBack()&&burned>0,goalK=tg.kcal+(eb?burned:0);var diff=goalK-t.k;over=diff<0;pct=Math.min(100,t.k/goalK*100);rem='<div class="rem'+(over?' over':'')+'">'+esc(over?tr('over',fmt(-diff)):tr('left',fmt(diff)))+'<small>'+esc(eb?tr('ofkcal_eb',fmt(tg.kcal),fmt(burned)):tr('ofkcal',fmt(goalK)))+'</small></div>';}
   else rem='<div class="rem"><small>'+esc(tr('nogoal'))+'</small></div>';
   var macros=[[tr('protein'),t.p,tg&&tg.protein,'var(--protein)'],[tr('carbs'),t.c,tg&&tg.carbs,'var(--carb)'],[tr('fats'),t.f,tg&&tg.fat,'var(--fat)']].map(function(m){
     var w=m[2]?Math.min(100,m[1]/m[2]*100):0;
@@ -720,10 +816,11 @@ function renderLog(){
    '<section class="label" aria-label="'+esc(tr('label_aria'))+'"><div class="ttl">'+esc(tr('label_ttl'))+'<small>'+esc(tr('label_small'))+'</small></div>'+
    '<div class="kc"><div><span class="n">'+fmt(t.k)+'</span><span class="u">kcal</span></div>'+rem+'</div>'+
    (tg?'<div class="gauge'+(over?' over':'')+'" role="img" aria-label="'+esc(tr('gauge',Math.round(pct)))+'"><i style="width:'+pct+'%"></i></div>':'')+
-   '<div class="rows">'+macros+'</div></section>'+
+   '<div class="rows">'+macros+'</div>'+(burned>0?'<div class="sub2">'+esc(tr('exsum',fmt(burned),fmt(t.k-burned)))+'</div>':'')+'</section>'+
    (tg?'':'<div class="banner"><span>'+esc(tr('banner'))+'</span><button class="btn" data-act="tab" data-tab="profil">'+esc(tr('setgoal'))+'</button></div>')+
    '<div class="actions one"><button class="btn primary" data-act="add-manual">'+esc(tr('manual'))+'</button></div>'+
-   list;
+   '<button class="btn block" data-act="add-ex">'+FLAME+esc(tr('ex_add'))+'</button>'+
+   list+exHtml(k);
 }
 
 /* ---------- render: calendar ---------- */
@@ -743,7 +840,7 @@ function renderCal(){
   for(var d=1;d<=dim;d++){
     var k=y+'-'+pad(m+1)+'-'+pad(d),st=dayStatus(k),t=totals(k);
     if(st!=='none'){logged++;sum+=t.k;if(st==='ok')ok++;}
-    cells+='<button class="day '+st+(k===tk?' today':'')+'" data-act="cal-day" data-date="'+k+'"'+(k>tk?' disabled':'')+' aria-label="'+d+' '+esc(mname)+(st!=='none'?', '+fmt(t.k)+' kcal':'')+'"><span class="num">'+d+'</span><span class="kk">'+(st!=='none'?fmt(t.k):'')+'</span></button>';
+    cells+='<button class="day '+st+(k===tk?' today':'')+(hasEx(k)?' hasex':'')+'" data-act="cal-day" data-date="'+k+'"'+(k>tk?' disabled':'')+' aria-label="'+d+' '+esc(mname)+(st!=='none'?', '+fmt(t.k)+' kcal':'')+(hasEx(k)?', '+esc(tr('ex_title')):'')+'"><span class="num">'+d+'</span><span class="kk">'+(st!=='none'?fmt(t.k):'')+'</span></button>';
   }
   var cur=new Date();var atNow=(y===cur.getFullYear()&&m===cur.getMonth());
   $('#view').innerHTML=
@@ -811,6 +908,9 @@ function renderProfile(){
    '<h2 class="sec">'+esc(tr('body_weight'))+'</h2>'+
    '<div class="wrow"><div class="field"><label for="wt">'+esc(tr('today_weight'))+'</label><input class="in" id="wt" inputmode="decimal" value="'+(tw?esc(tw):'')+'" placeholder="74.5"></div><button class="btn" style="align-self:end" data-act="save-weight">'+esc(tr('save'))+'</button></div>'+
    weightChart()+
+   '<h2 class="sec">'+esc(tr('ex_title'))+'</h2>'+
+   '<label class="check" for="eb"><input type="checkbox" id="eb"'+(eatBack()?' checked':'')+'><span>'+esc(tr('eb_label'))+'</span></label>'+
+   '<p class="note">'+esc(tr('eb_note'))+'</p>'+
    '<p class="note">'+esc(store)+'</p>'+
    '<p class="note">'+esc(tr('disclaimer'))+'</p>';
 }
@@ -852,6 +952,24 @@ function foodListHtml(){
 function catBarHtml(){
   return '<div class="catbar" role="group" aria-label="'+esc(tr('cat_aria'))+'">'+['all'].concat(CATS).map(function(c){return '<button type="button" class="chip" data-act="cat" data-v="'+c+'" aria-pressed="'+(S.cat===c)+'">'+esc(tr('cat_'+c))+'</button>';}).join('')+'</div>';
 }
+function exListHtml(){
+  var toks=S.exq.trim().toLowerCase().split(/\s+/).filter(Boolean),w=bodyWeight(),h='';
+  EXERCISES.forEach(function(a,i){
+    var hay=(a.n+' '+a.e).toLowerCase(),ok=true;
+    for(var j=0;j<toks.length;j++)if(hay.indexOf(toks[j])<0){ok=false;break;}
+    if(!ok)return;
+    h+='<button type="button" class="pickrow" data-act="ex-pick" data-i="'+i+'"><span><b>'+esc(exName(a))+'</b><small>'+esc(exDesc(a))+'</small></span><em>'+esc(w?tr('ex_per30',fmt(a.met*w*0.5)):'MET '+a.met)+'</em></button>';
+  });
+  return h||'<p class="note">'+esc(tr('ex_nomatch'))+'</p>';
+}
+function exCalc(){
+  var X=S.ex;if(!X)return null;
+  if(X.custom){var kk=parseFloat(String(X.kcal).replace(',','.'));return kk>=0?kk:null;}
+  var w=parseFloat(String(X.w).replace(',','.')),m=parseFloat(String(X.min).replace(',','.'));
+  if(!(w>=20&&w<=400)||!(m>0&&m<=1440))return null;
+  return X.met*w*m/60;
+}
+function exTotalHtml(){var k=exCalc();return esc(k==null?tr(S.ex&&S.ex.custom?'ex_need_k':'ex_need'):tr('ex_est',fmt(k)));}
 function renderSheet(){
   var el=$('#sheet'),pn=$('#panel');
   if(!S.open){el.hidden=true;document.body.style.overflow='';return;}
@@ -859,7 +977,7 @@ function renderSheet(){
   var head=function(ttl){return '<div class="phead"><h2>'+esc(ttl)+'</h2><button class="icon-btn" data-act="sheet-close" aria-label="'+esc(tr('close'))+'">'+X+'</button></div>';};
   var prev=S.preview?'<img class="prev" src="'+S.preview+'" alt="'+esc(tr('photo_alt'))+'">':'';
   var h='';
-  pn.className='panel'+(S.mode==='pick'?' tall':'');
+  pn.className='panel'+(S.mode==='pick'||S.mode==='expick'?' tall':'');
   if(S.mode==='busy'){
     h=head(tr('busy_ttl'))+prev+'<div class="busy"><div class="spin"></div><p>'+esc(tr('busy_txt'))+'</p></div><button class="btn block" data-act="sheet-close">'+esc(tr('cancel'))+'</button>';
   }else if(S.mode==='error'){
@@ -879,11 +997,25 @@ function renderSheet(){
       '<div class="field"><label for="mealSel">'+esc(tr('meal'))+'</label><select class="in" id="mealSel">'+MEALKEYS.map(function(mk){return '<option value="'+mk+'"'+(S.meal===mk?' selected':'')+'>'+esc(tr('meal_'+mk))+'</option>';}).join('')+'</select></div>'+
       '<div class="total" id="sheetTotal">'+totalHtml()+'</div>'+
       '<div class="btnrow"><button class="btn" data-act="sheet-close">'+esc(tr('cancel'))+'</button><button class="btn primary" data-act="save-sheet">'+esc(tr('save_log'))+'</button></div>';
+  }else if(S.mode==='expick'){
+    h='<div class="pickhead">'+head(tr('ex_add'))+'<input class="in" id="exq" type="search" placeholder="'+esc(tr('ex_search_ph'))+'" aria-label="'+esc(tr('ex_search_aria'))+'" value="'+esc(S.exq)+'" autocomplete="off"></div>'+
+      '<div class="foodlist" id="exlist">'+exListHtml()+'</div>'+
+      '<p class="note" style="margin:0">'+esc(tr('ex_note_pick'))+'</p>'+
+      '<div class="pickfoot"><div class="btnrow"><button class="btn" data-act="ex-blank">'+esc(tr('own'))+'</button><button class="btn" data-act="sheet-close">'+esc(tr('cancel'))+'</button></div></div>';
+  }else if(S.mode==='exedit'){
+    var xe=S.ex||{},xa=xe.i>=0?EXERCISES[xe.i]:null;
+    h=head(tr('ex_detail'))+
+      '<div class="item"><input class="nameinp" id="exname" value="'+esc(xe.name)+'" placeholder="'+esc(tr('ex_name'))+'" aria-label="'+esc(tr('ex_name'))+'" maxlength="60">'+
+      (xa?'<div class="note">'+esc(exDesc(xa))+' · MET '+xa.met+'</div>':'')+
+      '<div class="field"><label for="exmin">'+esc(tr('ex_dur'))+'</label><div class="chips" role="group" aria-label="'+esc(tr('ex_dur'))+'">'+[15,30,45,60,90].map(function(m){return '<button type="button" class="chip" data-act="ex-min" data-m="'+m+'" aria-pressed="'+(String(xe.min)===String(m))+'">'+m+'</button>';}).join('')+'</div><input class="in" id="exmin" inputmode="numeric" value="'+esc(xe.min)+'"></div>'+
+      (xe.custom?'<div class="field"><label for="exkcal">'+esc(tr('ex_kcal_in'))+'</label><input class="in" id="exkcal" inputmode="decimal" value="'+esc(xe.kcal)+'"></div>':'<div class="field"><label for="exw">'+esc(tr('ex_weight'))+'</label><input class="in" id="exw" inputmode="decimal" value="'+esc(xe.w)+'"></div>')+
+      '</div><div class="total" id="exTotal">'+exTotalHtml()+'</div>'+
+      '<div class="btnrow"><button class="btn" data-act="sheet-close">'+esc(tr('cancel'))+'</button><button class="btn primary" data-act="save-ex">'+esc(tr('ex_save'))+'</button></div>';
   }
   pn.innerHTML=h;
 }
 function openSheet(mode){S.open=true;S.mode=mode;renderSheet();}
-function closeSheet(){aid++;if(ctl){try{ctl.abort();}catch(e){}ctl=null;}S.open=false;S.items=[];S.preview=null;S.th=null;S.blob=null;S.note='';S.conf='';S.err='';S.q='';S.cat='all';renderSheet();}
+function closeSheet(){aid++;if(ctl){try{ctl.abort();}catch(e){}ctl=null;}S.open=false;S.items=[];S.preview=null;S.th=null;S.blob=null;S.note='';S.conf='';S.err='';S.q='';S.cat='all';S.ex=null;S.exq='';renderSheet();}
 function sheetError(code,note){S.mode='error';S.err=code;S.note=note||'';renderSheet();}
 
 function normItem(x){
@@ -972,11 +1104,39 @@ function delEntry(id){
   persistDay(k);render();
   toast(tr('deleted'),{id:'undo',label:tr('undo')});
 }
+function saveEx(){
+  var X=S.ex;if(!X)return;
+  var kc=exCalc();
+  if(kc==null){toast(tr(X.custom?'ex_need_k':'ex_need'));return;}
+  var k=state.date,day=state.days[k]||(state.days[k]={entries:[]});
+  if(!day.entries)day.entries=[];
+  if(!day.exercises)day.exercises=[];
+  var base=k===todayKey()?new Date():new Date(fromKey(k).getTime()+12*36e5);
+  var m=parseFloat(String(X.min).replace(',','.')),e={id:newId(),t:base.toISOString(),name:(X.name||'').trim()||tr('ex_default'),kcal:Math.round(kc)};
+  if(m>0)e.min=Math.round(m);
+  if(!X.custom){
+    e.met=X.met;
+    var w=parseFloat(String(X.w).replace(',','.'));e.w=r1(w);
+    try{localStorage.setItem('kirakalori.exw',String(r1(w)));}catch(er){}
+  }
+  day.exercises.push(e);
+  persistDay(k);closeSheet();render();
+  toast(tr('ex_saved',fmt(kc)));
+}
+function delEx(id){
+  var k=state.date,day=state.days[k];if(!day||!day.exercises)return;
+  var i=day.exercises.findIndex(function(e){return e.id===id;});if(i<0)return;
+  lastDel={k:k,e:day.exercises[i],i:i,ex:true};
+  day.exercises.splice(i,1);
+  persistDay(k);render();
+  toast(tr('ex_deleted'),{id:'undo',label:tr('undo')});
+}
 function undoDel(){
   if(!lastDel)return;
   var d=state.days[lastDel.k]||(state.days[lastDel.k]={entries:[]});
-  if(!d.entries)d.entries=[];
-  d.entries.splice(Math.min(lastDel.i,d.entries.length),0,lastDel.e);
+  var lk=lastDel.ex?'exercises':'entries';
+  if(!d[lk])d[lk]=[];
+  d[lk].splice(Math.min(lastDel.i,d[lk].length),0,lastDel.e);
   persistDay(lastDel.k);lastDel=null;$('#toast').hidden=true;render();
 }
 function shiftDay(n){var d=fromKey(state.date);d.setDate(d.getDate()+n);var k=keyOf(d);if(k>todayKey())return;state.date=k;render();window.scrollTo(0,0);}
@@ -1037,6 +1197,16 @@ document.addEventListener('click',function(e){
   else if(a==='mult'){var it=S.items[+ds.i];if(it){it.mult=+ds.m;renderSheet();}}
   else if(a==='rm-item'){S.items.splice(+ds.i,1);S.mode=S.items.length?'edit':'pick';renderSheet();}
   else if(a==='save-sheet')saveSheet();
+  else if(a==='add-ex'){S.items=[];S.ex=null;S.exq='';openSheet('expick');}
+  else if(a==='ex-pick'){var xa=EXERCISES[+ds.i],bw=bodyWeight();if(xa){S.ex={i:+ds.i,name:exName(xa),met:xa.met,min:'30',w:bw?String(bw):'',kcal:'',custom:false};S.mode='exedit';renderSheet();}}
+  else if(a==='ex-blank'){S.ex={i:-1,name:'',met:0,min:'30',w:'',kcal:'',custom:true};S.mode='exedit';renderSheet();}
+  else if(a==='ex-min'){
+    if(S.ex){S.ex.min=ds.m;var mi=$('#exmin');if(mi)mi.value=ds.m;
+      b.parentNode.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b));});
+      $('#exTotal').innerHTML=exTotalHtml();}
+  }
+  else if(a==='save-ex')saveEx();
+  else if(a==='del-ex')delEx(ds.id);
   else if(a==='del')delEntry(ds.id);
   else if(a==='undo')undoDel();
   else if(a==='seg'){
@@ -1051,6 +1221,13 @@ document.addEventListener('click',function(e){
 document.addEventListener('input',function(e){
   var t=e.target;
   if(t.id==='q'){S.q=t.value;$('#foodlist').innerHTML=foodListHtml();$('#panel').scrollTop=0;}
+  else if(t.id==='exq'){S.exq=t.value;$('#exlist').innerHTML=exListHtml();$('#panel').scrollTop=0;}
+  else if(t.id==='exname'){if(S.ex)S.ex.name=t.value;}
+  else if(t.id==='exmin'||t.id==='exw'||t.id==='exkcal'){
+    if(S.ex)S.ex[t.id==='exmin'?'min':(t.id==='exw'?'w':'kcal')]=t.value;
+    if(t.id==='exmin')document.querySelectorAll('[data-act="ex-min"]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.m===String(t.value).trim()));});
+    $('#exTotal').innerHTML=exTotalHtml();
+  }
   else if(t.classList.contains('nameinp')){var it=S.items[+t.dataset.i];if(it)it.name=t.value;}
   else if(t.classList.contains('numinp')){
     var i=+t.dataset.i,it2=S.items[i];if(!it2)return;
@@ -1070,6 +1247,7 @@ document.addEventListener('input',function(e){
 document.addEventListener('change',function(e){
   var t=e.target;
   if(t.id==='mealSel')S.meal=t.value;
+  else if(t.id==='eb'){EB=t.checked;try{localStorage.setItem('kirakalori.eb',EB?'1':'0');}catch(er){}}
   else if(t.id==='pf-act'){state.draft.activity=t.value;state.touched=true;$('#result').innerHTML=resultHtml();}
 });
 document.addEventListener('keydown',function(e){
