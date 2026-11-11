@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<style>[hidden]{display:none!important}label[for="photo"]{display:none}.actions{grid-template-columns:1fr!important}</style>
 <title>KiraKalori</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Public+Sans:wght@400;500;600;700&display=swap">
@@ -88,7 +89,6 @@ main{display:flex;flex-direction:column;gap:18px;padding-block:16px calc(92px + 
 .btn .ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .link{border:0;background:none;padding:6px 0;color:var(--ink2);font-size:12.5px;font-weight:600;text-decoration:underline;cursor:pointer}
 .actions{display:grid;grid-template-columns:1.4fr 1fr;gap:10px}
-.actions.one{grid-template-columns:1fr}
 
 .banner{background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;font-size:14px}
 .sect h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin:0 0 2px;display:flex;justify-content:space-between;gap:8px}
@@ -191,6 +191,31 @@ h2.sec{font-family:var(--display);font-size:20px;margin:0}
 .check{display:flex;align-items:flex-start;gap:12px;min-height:44px;font-weight:600;cursor:pointer}
 .check input{flex:none;width:22px;height:22px;margin:0;accent-color:var(--accent)}
 .day.hasex .num::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin-left:4px;vertical-align:middle}
+.catbar[hidden]{display:none}
+.icon-btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.exsearch{display:grid;grid-template-columns:minmax(0,1fr) 46px;gap:8px}
+.exsearch .icon-btn{width:46px;height:46px}
+.pickrow.exrow{grid-template-columns:48px minmax(0,1fr) 18px;gap:12px;min-height:68px}
+.exrow .ext b{display:block}
+.exic{width:48px;height:48px;border-radius:12px;background:var(--soft);color:var(--accent);display:grid;place-items:center}
+.exic svg,.exbig>svg{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+.exic svg{width:28px;height:28px;stroke-width:1.8}
+.exrow>svg.chev{width:18px;height:18px;fill:none;stroke:var(--ink2);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.exhero{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+.excat{font-size:13px;font-weight:600;color:var(--ink2)}
+.exbig{width:100%;height:170px;border-radius:20px;background:var(--soft);color:var(--accent);display:grid;place-items:center}
+.exbig>svg{width:96px;height:96px;stroke-width:1.4}
+.icon-btn.star{border-color:transparent;background:transparent}
+.icon-btn.star svg{fill:none;stroke-linejoin:round}
+.icon-btn.star[aria-pressed="true"]{color:var(--accent);background:transparent}
+.icon-btn.star[aria-pressed="true"] svg{fill:currentColor}
+.exhero .note{text-align:left}
+.exnm{margin:0;font-family:var(--display);font-size:22px;line-height:1.15;font-weight:400}
+.exhero .nameinp{font-family:var(--body);font-size:18px}
+.opt{font-weight:500;text-transform:none;letter-spacing:0;color:var(--ink2)}
+.ta{padding:10px 12px;min-height:84px;resize:vertical;line-height:1.4;font-family:inherit}
+.exnote{font-style:italic}
+.pickfoot .btn.block{width:100%}
 @media (prefers-reduced-motion:reduce){.panel{animation:none}.spin{animation:none}}
 </style>
 
@@ -224,7 +249,6 @@ var fmt=function(n){return Math.round(n).toLocaleString('en-US');};
 var r1=function(n){return Math.round(n*10)/10;};
 var newId=function(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);};
 var kcOf=function(f){return Math.round(4*f.p+4*f.c+9*f.f);};
-var STANDALONE=true; /* standalone site: data stays in this browser, no photo analysis */
 
 /* ---------- language (Bahasa Malaysia / English) ---------- */
 var EB=false;try{EB=localStorage.getItem('kirakalori.eb')==='1';}catch(e){}
@@ -250,7 +274,7 @@ ms:{
  label_ttl:'Maklumat Pemakanan',label_small:'Anggaran',label_aria:'Ringkasan pemakanan',
  banner:'Tetapkan sasaran harian di Profil untuk melihat baki kalori dan sasaran protein, karbohidrat dan lemak.',setgoal:'Tetapkan sasaran',
  photo:'Ambil gambar',manual:'Tambah manual',
- empty:'Belum ada makanan dicatat. Tekan "Tambah manual" untuk pilih daripada senarai makanan dan minuman.',
+ empty:'Belum ada makanan dicatat. Ambil gambar makanan atau pilih daripada senarai makanan dan minuman.',
  prevday:'Hari sebelumnya',nextday:'Hari berikutnya',prevmon:'Bulan sebelumnya',nextmon:'Bulan berikutnya',
  lg_ok:'Dalam sasaran',lg_over:'Melebihi sasaran',lg_low:'Bawah 60% sasaran (mungkin belum lengkap)',
  cal_nogoal:'Tetapkan sasaran di Profil untuk melihat warna status setiap hari.',
@@ -268,7 +292,7 @@ ms:{
  chart_aria:'Graf berat badan',chart_need:'Catat berat pada dua hari atau lebih untuk melihat graf.',
  chart_delta:function(d,since){return 'Perubahan '+d+' kg sejak '+since+'.';},
  store_ok:'Data anda disimpan secara peribadi dalam akaun Claude anda.',
- store_local:'Data disimpan dalam pelayar peranti ini sahaja. Jika anda kosongkan data pelayar, catatan akan hilang.',
+ store_local:'Data disimpan dalam peranti ini sahaja. Buka halaman ini dalam Claude untuk simpanan akaun.',
  store_bad:'Belum dapat bersambung ke simpanan akaun. Data baharu disimpan dalam peranti ini dahulu.',
  store_wait:'Menyambung ke simpanan akaun…',
  disclaimer:'Semua nombor ialah anggaran umum dan bukan nasihat perubatan. Jika anda mempunyai keadaan kesihatan, mengandung atau menyusu, rujuk doktor atau pakar pemakanan sebelum mengubah pemakanan.',
@@ -293,11 +317,22 @@ ms:{
  goal_saved:function(k){return 'Sasaran disimpan: '+k+' kcal sehari';},
  weight_bad:'Masukkan berat antara 20 dan 400 kg',weight_saved:'Berat disimpan',
  food_default:'Makanan',
+ ex_log_ttl:'Log Senaman',ex_filter:'Tapis ikut kategori',ex_tabs_aria:'Senarai senaman',
+ ex_tab_all:'Semua',ex_tab_recent:'Terkini',ex_tab_fav:'Kegemaran',
+ excat_kardio:'Kardio',excat_sukan:'Sukan',excat_gim:'Gim',excat_tubuh:'Tubuh dan minda',excat_harian:'Aktiviti harian',
+ ex_custom:'Senaman sendiri',ex_custom_lbl:'Senaman sendiri',
+ ex_empty_recent:'Belum ada senaman terkini. Senaman yang anda simpan akan muncul di sini.',
+ ex_empty_fav:'Belum ada kegemaran. Buka satu senaman dan tekan bintang.',
+ ex_last:function(m,k){return 'Terakhir: '+m+k+' kcal';},
+ ex_fav:'Kegemaran',ex_back:'Kembali',ex_km:'Jarak (km)',ex_opt:'(pilihan)',ex_notes:'Nota',ex_notes_ph:'Cth. di taman, rasa penat sedikit',
+ ex_kcal_ph:'kcal',ex_kcal_hint:'Kosongkan untuk guna anggaran di bawah.',
+ ex_speed:function(s,m){return 'Laju purata '+s+' km/j · MET '+m;},
+ ex_speed_off:'Jarak dan tempoh nampak tidak munasabah, jadi MET asal digunakan.',
  ex_title:'Senaman',ex_add:'Tambah senaman',ex_min:'min',ex_default:'Senaman',
  exsum:function(b,n){return 'Dibakar '+b+' kcal · Bersih '+n+' kcal';},
  ofkcal_eb:function(t,b){return 'daripada '+t+' + '+b+' kcal';},
  ex_search_ph:'Cari jalan kaki, badminton, gim…',ex_search_aria:'Cari senaman',
- ex_nomatch:'Tiada padanan. Cuba kata kunci lain, atau tekan "Isi sendiri" untuk masukkan nama dan kalori anda.',
+ ex_nomatch:'Tiada padanan. Cuba kata kunci lain, atau tekan \"Senaman sendiri\" untuk masukkan nama dan kalori anda.',
  ex_note_pick:'Nilai MET ialah anggaran purata. Kalori sebenar bergantung pada berat, intensiti dan kecergasan anda. Kiraan: MET × berat (kg) × jam.',
  ex_per30:function(k){return '≈ '+k+' kcal / 30 min';},
  ex_detail:'Butiran senaman',ex_name:'Nama senaman',ex_dur:'Tempoh (minit)',ex_weight:'Berat badan (kg)',ex_kcal_in:'Kalori dibakar (kcal)',
@@ -337,7 +372,7 @@ en:{
  label_ttl:'Nutrition Information',label_small:'Estimate',label_aria:'Nutrition summary',
  banner:'Set your daily goal in Profile to see calories left and your protein, carbohydrate and fat targets.',setgoal:'Set goal',
  photo:'Take photo',manual:'Add manually',
- empty:'No food logged yet. Tap "Add manually" to pick from the food and drink list.',
+ empty:'No food logged yet. Take a photo of your meal or pick from the food and drink list.',
  prevday:'Previous day',nextday:'Next day',prevmon:'Previous month',nextmon:'Next month',
  lg_ok:'On target',lg_over:'Over target',lg_low:'Under 60% of goal (may be incomplete)',
  cal_nogoal:'Set your goal in Profile to see a status colour for each day.',
@@ -355,7 +390,7 @@ en:{
  chart_aria:'Body weight chart',chart_need:'Log your weight on two or more days to see the chart.',
  chart_delta:function(d,since){return 'Change '+d+' kg since '+since+'.';},
  store_ok:'Your data is stored privately in your Claude account.',
- store_local:'Data is stored in this device\'s browser only. If you clear your browser data, your log will be lost.',
+ store_local:'Data is stored on this device only. Open this page in Claude to save to your account.',
  store_bad:'Cannot connect to account storage yet. New data is saved on this device for now.',
  store_wait:'Connecting to account storage…',
  disclaimer:'All numbers are general estimates, not medical advice. If you have a health condition, are pregnant or breastfeeding, talk to a doctor or dietitian before changing your diet.',
@@ -380,11 +415,22 @@ en:{
  goal_saved:function(k){return 'Goal saved: '+k+' kcal a day';},
  weight_bad:'Enter a weight between 20 and 400 kg',weight_saved:'Weight saved',
  food_default:'Food',
+ ex_log_ttl:'Log Exercise',ex_filter:'Filter by category',ex_tabs_aria:'Exercise list',
+ ex_tab_all:'All exercises',ex_tab_recent:'Recent',ex_tab_fav:'Favorites',
+ excat_kardio:'Cardio',excat_sukan:'Sports',excat_gim:'Gym',excat_tubuh:'Mind and body',excat_harian:'Daily life',
+ ex_custom:'Custom exercise',ex_custom_lbl:'Custom exercise',
+ ex_empty_recent:'No recent exercises yet. Exercises you save will show up here.',
+ ex_empty_fav:'No favorites yet. Open an exercise and tap the star.',
+ ex_last:function(m,k){return 'Last: '+m+k+' kcal';},
+ ex_fav:'Favorite',ex_back:'Back',ex_km:'Distance (km)',ex_opt:'(optional)',ex_notes:'Notes',ex_notes_ph:'e.g. at the park, felt a bit tired',
+ ex_kcal_ph:'kcal',ex_kcal_hint:'Leave empty to use the estimate below.',
+ ex_speed:function(s,m){return 'Average speed '+s+' km/h · MET '+m;},
+ ex_speed_off:'Distance and duration look unrealistic, so the base MET was used.',
  ex_title:'Exercise',ex_add:'Add exercise',ex_min:'min',ex_default:'Exercise',
  exsum:function(b,n){return 'Burned '+b+' kcal · Net '+n+' kcal';},
  ofkcal_eb:function(t,b){return 'of '+t+' + '+b+' kcal';},
  ex_search_ph:'Search walking, badminton, gym…',ex_search_aria:'Search exercise',
- ex_nomatch:'No match. Try another keyword, or tap "Enter my own" to add your own name and calories.',
+ ex_nomatch:'No match. Try another keyword, or tap \"Custom exercise\" to add your own name and calories.',
  ex_note_pick:'MET values are average estimates. Real calories depend on your weight, intensity and fitness. Formula: MET × weight (kg) × hours.',
  ex_per30:function(k){return '≈ '+k+' kcal / 30 min';},
  ex_detail:'Exercise details',ex_name:'Exercise name',ex_dur:'Duration (minutes)',ex_weight:'Body weight (kg)',ex_kcal_in:'Calories burned (kcal)',
@@ -617,47 +663,87 @@ var foodName=function(f){return LANG==='en'?f.e:f.n;};
 var foodPortion=function(f){return LANG==='en'?f.se:f.s;};
 
 /* ---------- exercise list ----------
-   Row: [Malay name, English name, Malay note, English note, MET]
-   Calories = MET x body weight (kg) x hours. Averages only. */
+   Row: [key, category, icon, Malay name, English name, Malay note, English note, MET, speed kind]
+   Calories = MET x body weight (kg) x hours. Averages only.
+   Speed kind (walk, run, bike) lets a distance adjust the MET; plain only records the distance. */
+var EXCATS=['kardio','sukan','gim','tubuh','harian'];
 var EXERCISES=[
- ['Jalan kaki santai','Easy walk','sekitar 3 km/j','about 3 km/h',2.8],
- ['Jalan pantas','Brisk walk','sekitar 5.5 km/j','about 5.5 km/h',4.3],
- ['Mendaki bukit','Hiking','denai berbukit','hilly trail',6],
- ['Naik turun tangga','Climbing stairs','santai hingga sederhana','easy to moderate',4],
- ['Jogging','Jogging','sekitar 8 km/j','about 8 km/h',7],
- ['Berlari','Running','sekitar 10 km/j','about 10 km/h',9.8],
- ['Berlari laju','Fast running','sekitar 12 km/j','about 12 km/h',12],
- ['Berbasikal santai','Easy cycling','bawah 16 km/j','under 16 km/h',4],
- ['Berbasikal sederhana','Moderate cycling','16 hingga 19 km/j','16 to 19 km/h',6.8],
- ['Berbasikal laju','Fast cycling','19 hingga 22 km/j','19 to 22 km/h',8],
- ['Berenang santai','Easy swimming','kayuhan perlahan','slow laps',6],
- ['Berenang laju','Fast swimming','kayuhan kuat','vigorous laps',9.8],
- ['Badminton (santai)','Badminton (casual)','permainan rekreasi','recreational play',4.5],
- ['Badminton (bersungguh-sungguh)','Badminton (competitive)','perlawanan atau latihan kuat','match or hard training',7],
- ['Futsal atau bola sepak','Futsal or football','permainan umum','general play',7],
- ['Bola keranjang','Basketball','permainan umum','general play',6.5],
- ['Tenis','Tennis','permainan umum','general play',7.3],
- ['Ping pong','Table tennis','permainan umum','general play',4],
- ['Bola tampar (santai)','Volleyball (casual)','permainan rekreasi','recreational play',3],
- ['Angkat beban (ringan hingga sederhana)','Weight training (light to moderate)','latihan gim biasa','typical gym session',3.5],
- ['Angkat beban (berat)','Weight training (heavy)','set berat, rehat singkat','heavy sets, short rests',6],
- ['Senaman berat badan','Bodyweight exercises','tekan tubi, sit-up, squat','push-ups, sit-ups, squats',3.8],
- ['HIIT atau circuit','HIIT or circuit training','selang kuat dan rehat','hard and rest intervals',8],
- ['Skipping','Skipping rope','sederhana','moderate pace',11.8],
- ['Mesin dayung','Rowing machine','sederhana','moderate effort',7],
- ['Mesin elips','Elliptical trainer','sederhana','moderate effort',5],
- ['Aerobik','Aerobics','kelas aerobik','aerobics class',7.3],
- ['Zumba atau menari','Zumba or dancing','kelas tarian','dance class',6.5],
- ['Yoga','Yoga','hatha, santai','hatha, relaxed',2.5],
- ['Pilates','Pilates','kelas biasa','regular class',3],
- ['Regangan','Stretching','ringan','light',2.3],
- ['Silat, taekwondo atau karate','Silat, taekwondo or karate','latihan atau sparring','training or sparring',10.3],
- ['Mengemas rumah','Housework','menyapu, mengemop, mengemas','sweeping, mopping, tidying',3.3],
- ['Berkebun','Gardening','kerja kebun umum','general garden work',3.8],
- ['Bermain aktif dengan anak','Active play with kids','berlari dan bermain','running and playing',4]
-].map(function(r){return {n:r[0],e:r[1],d:r[2],de:r[3],met:r[4]};});
+ ['walk_easy','kardio','walk','Jalan kaki santai','Easy walk','sekitar 3 km/j','about 3 km/h',2.8,'walk'],
+ ['walk_brisk','kardio','walk','Jalan pantas','Brisk walk','sekitar 5.5 km/j','about 5.5 km/h',4.3,'walk'],
+ ['hike','kardio','hike','Mendaki bukit','Hiking','denai berbukit','hilly trail',6,'plain'],
+ ['stairs','kardio','stairs','Naik turun tangga','Climbing stairs','santai hingga sederhana','easy to moderate',4,''],
+ ['jog','kardio','run','Jogging','Jogging','sekitar 8 km/j','about 8 km/h',7,'run'],
+ ['run','kardio','run','Berlari','Running','sekitar 10 km/j','about 10 km/h',9.8,'run'],
+ ['run_fast','kardio','run','Berlari laju','Fast running','sekitar 12 km/j','about 12 km/h',12,'run'],
+ ['bike_easy','kardio','bike','Berbasikal santai','Easy cycling','bawah 16 km/j','under 16 km/h',4,'bike'],
+ ['bike_mod','kardio','bike','Berbasikal sederhana','Moderate cycling','16 hingga 19 km/j','16 to 19 km/h',6.8,'bike'],
+ ['bike_fast','kardio','bike','Berbasikal laju','Fast cycling','19 hingga 22 km/j','19 to 22 km/h',8,'bike'],
+ ['swim_easy','kardio','swim','Berenang santai','Easy swimming','kayuhan perlahan','slow laps',6,'plain'],
+ ['swim_fast','kardio','swim','Berenang laju','Fast swimming','kayuhan kuat','vigorous laps',9.8,'plain'],
+ ['rowing','kardio','machine','Mesin dayung','Rowing machine','sederhana','moderate effort',7,'plain'],
+ ['elliptical','kardio','machine','Mesin elips','Elliptical trainer','sederhana','moderate effort',5,''],
+ ['skipping','kardio','rope','Skipping','Skipping rope','sederhana','moderate pace',11.8,''],
+ ['aerobics','kardio','dance','Aerobik','Aerobics','kelas aerobik','aerobics class',7.3,''],
+ ['zumba','kardio','dance','Zumba atau menari','Zumba or dancing','kelas tarian','dance class',6.5,''],
+ ['badminton_c','sukan','racket','Badminton (santai)','Badminton (casual)','permainan rekreasi','recreational play',4.5,''],
+ ['badminton_h','sukan','racket','Badminton (bersungguh-sungguh)','Badminton (competitive)','perlawanan atau latihan kuat','match or hard training',7,''],
+ ['futsal','sukan','ball','Futsal atau bola sepak','Futsal or football','permainan umum','general play',7,''],
+ ['basketball','sukan','ball','Bola keranjang','Basketball','permainan umum','general play',6.5,''],
+ ['tennis','sukan','racket','Tenis','Tennis','permainan umum','general play',7.3,''],
+ ['tabletennis','sukan','racket','Ping pong','Table tennis','permainan umum','general play',4,''],
+ ['volleyball','sukan','ball','Bola tampar (santai)','Volleyball (casual)','permainan rekreasi','recreational play',3,''],
+ ['takraw','sukan','ball','Sepak takraw','Sepak takraw','permainan umum','general play',5,''],
+ ['kayak','sukan','swim','Berkayak','Kayaking','santai hingga sederhana','easy to moderate',5,'plain'],
+ ['golf','sukan','ball','Golf (berjalan)','Golf (walking)','berjalan dengan kelab golf','walking with clubs',4.8,''],
+ ['climbing','sukan','hike','Panjat dinding','Rock climbing','dinding panjat dalaman','indoor climbing wall',7.5,''],
+ ['martial','sukan','martial','Silat, taekwondo atau karate','Silat, taekwondo or karate','latihan atau sparring','training or sparring',10.3,''],
+ ['weights_light','gim','dumbbell','Angkat beban (ringan hingga sederhana)','Weight training (light to moderate)','latihan gim biasa','typical gym session',3.5,''],
+ ['weights_heavy','gim','dumbbell','Angkat beban (berat)','Weight training (heavy)','set berat, rehat singkat','heavy sets, short rests',6,''],
+ ['bodyweight','gim','body','Senaman berat badan','Bodyweight exercises','tekan tubi, sit-up, squat','push-ups, sit-ups, squats',3.8,''],
+ ['hiit','gim','bolt','HIIT atau circuit','HIIT or circuit training','selang kuat dan rehat','hard and rest intervals',8,''],
+ ['yoga','tubuh','yoga','Yoga','Yoga','hatha, santai','hatha, relaxed',2.5,''],
+ ['pilates','tubuh','yoga','Pilates','Pilates','kelas biasa','regular class',3,''],
+ ['stretching','tubuh','yoga','Regangan','Stretching','ringan','light',2.3,''],
+ ['housework','harian','home','Mengemas rumah','Housework','menyapu, mengemop, mengemas','sweeping, mopping, tidying',3.3,''],
+ ['gardening','harian','plant','Berkebun','Gardening','kerja kebun umum','general garden work',3.8,''],
+ ['kidsplay','harian','kids','Bermain aktif dengan anak','Active play with kids','berlari dan bermain','running and playing',4,'']
+].map(function(r){return {k:r[0],cat:r[1],ic:r[2],n:r[3],e:r[4],d:r[5],de:r[6],met:r[7],kind:r[8]};});
 var exName=function(a){return LANG==='en'?a.e:a.n;};
 var exDesc=function(a){return LANG==='en'?a.de:a.d;};
+/* speed (km/h) to MET, from the standard compendium steps; linear between points */
+var EXR={
+ walk:{lo:1.5,hi:9,t:[[3.2,2.8],[4,3],[4.8,3.5],[5.6,4.3],[6.4,5],[7.2,6.5]]},
+ run:{lo:4,hi:24,t:[[6.4,6],[8,8.3],[9.7,9.8],[11.3,11],[12.9,11.8],[14.5,12.8],[16,14.5]]},
+ bike:{lo:4,hi:50,t:[[8,3],[14,4],[17.5,6.8],[20.7,8],[24,10],[28,12],[32,15.8]]}
+};
+function interp(t,x){
+  if(x<=t[0][0])return t[0][1];
+  for(var i=1;i<t.length;i++){if(x<=t[i][0]){var a=t[i-1],b=t[i];return a[1]+(b[1]-a[1])*(x-a[0])/(b[0]-a[0]);}}
+  return t[t.length-1][1];
+}
+var EXICON={
+ walk:'<circle cx="13" cy="4.5" r="1.8"/><path d="M13 8.5l-2 4.5 3 2.5.5 5M11 13l-3.5 1.5M13 8.5l3 2.5 2 .5"/>',
+ run:'<circle cx="15" cy="4.5" r="1.8"/><path d="M13.5 8.5l-3.5 3-3 .5M13.5 8.5l3 3.5 3 0M10 11.5l2.5 4-3 4.5M12.5 15.5l4 1 1 3.5"/>',
+ hike:'<path d="M3 20l6.5-11 3.5 6 2-3 6 8z"/><path d="M9.5 9l1.5 2.5"/>',
+ stairs:'<path d="M4 20h4v-4h4v-4h4V8h4"/>',
+ bike:'<circle cx="6" cy="16" r="3.5"/><circle cx="18" cy="16" r="3.5"/><path d="M6 16l4-7h5l3 7M10 9l3 7M9 6h3"/>',
+ swim:'<circle cx="16" cy="6.5" r="1.8"/><path d="M5 12.5l5.5-2.5 4 2.5M3 16c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2M3 20c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2"/>',
+ racket:'<ellipse cx="14.5" cy="9" rx="4.8" ry="6" transform="rotate(35 14.5 9)"/><path d="M10.8 13.6L5 20.5"/>',
+ ball:'<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17M6 6c3 2.5 3 9.5 0 12M18 6c-3 2.5-3 9.5 0 12"/>',
+ dumbbell:'<path d="M6.5 7.5v9M17.5 7.5v9M3.5 10v4M20.5 10v4M6.5 12h11"/>',
+ body:'<circle cx="18.5" cy="8" r="1.7"/><path d="M3 19h18M5 16l11-4.5 2 2.5M5 16v3"/>',
+ bolt:'<path d="M13 3L5 13.5h6L10 21l8-10.5h-6z"/>',
+ rope:'<path d="M6 3v5M18 3v5M6 8c0 15 12 15 12 0"/>',
+ machine:'<circle cx="8" cy="7.5" r="1.7"/><path d="M3 19h17M9 10l2 4.5h5.5M16.5 14.5l3-2.5M5 19v-3"/>',
+ dance:'<circle cx="12" cy="4.5" r="1.8"/><path d="M12 8v6M12 10l-5-2M12 10l5 3M12 14l-3 6M12 14l4 6"/>',
+ yoga:'<circle cx="12" cy="5" r="1.8"/><path d="M12 8.5v5M12 10c-3 0-5-1-6.5-2.5M12 10c3 0 5-1 6.5-2.5M4 19c3-1 5-3 8-5.5 3 2.5 5 4.5 8 5.5"/>',
+ martial:'<circle cx="9" cy="5" r="1.8"/><path d="M9 8.5l1 5-3 6.5M10 13.5l4 1 4-3M9 8.5l5 1 3-2"/>',
+ home:'<path d="M4 11l8-7 8 7M6 10v10h12V10M10 20v-5h4v5"/>',
+ plant:'<path d="M12 21v-9M12 12c0-4-3-6-7-6 0 4 3 6 7 6zM12 14c0-3 2-5 6-5 0 3-2 5-6 5z"/>',
+ kids:'<circle cx="9" cy="6" r="1.6"/><circle cx="17" cy="9" r="1.3"/><path d="M9 9v5l-2 5M9 14l2 5M9 11l-3 1M9 11l3-1M17 11.5v4l-1.5 3.5M17 15.5l1.5 3.5"/>',
+ pencil:'<path d="M4 20l1-4L16 5l3 3L8 19zM14 7l3 3"/>'
+};
+var exIcon=function(k){return '<svg viewBox="0 0 24 24" aria-hidden="true">'+(EXICON[k]||EXICON.pencil)+'</svg>';};
 
 
 var MEALKEYS=['sarapan','tengahari','snek','malam'];
@@ -682,13 +768,13 @@ function buildPrompt(){
 /* ---------- state ---------- */
 var LS='kirakalori.v1';
 var now0=new Date();
-var state={tab:'log',date:todayKey(),cal:{y:now0.getFullYear(),m:now0.getMonth()},profile:null,days:{},cloud:'connecting',draft:null,touched:false};
-var S={open:false,mode:'',items:[],meal:'sarapan',preview:null,th:null,blob:null,note:'',conf:'',err:'',q:'',cat:'all',src:'manual',ex:null,exq:''};
+var state={tab:'log',date:todayKey(),cal:{y:now0.getFullYear(),m:now0.getMonth()},profile:null,days:{},cloud:'connecting',draft:null,touched:false,fav:[]};
+var S={open:false,mode:'',items:[],meal:'sarapan',preview:null,th:null,blob:null,note:'',conf:'',err:'',q:'',cat:'all',src:'manual',ex:null,exq:'',exTab:'all',exCat:'all',exFilt:false};
 var db=null,userId=null,samplePromise=Promise.resolve(null),ctl=null,aid=0,lastDel=null,toastT=null,writeQ={};
 
-function lsLoad(){try{var j=JSON.parse(localStorage.getItem(LS)||'null');if(j){state.profile=j.profile||null;state.days=j.days||{};}}catch(e){}}
-function lsSave(){try{localStorage.setItem(LS,JSON.stringify({profile:state.profile,days:state.days}));}catch(e){}}
-function hasLocal(){return !!state.profile||Object.keys(state.days).some(function(k){var d=state.days[k];return d&&((d.entries&&d.entries.length)||(d.exercises&&d.exercises.length)||d.weight);});}
+function lsLoad(){try{var j=JSON.parse(localStorage.getItem(LS)||'null');if(j){state.profile=j.profile||null;state.days=j.days||{};state.fav=Array.isArray(j.fav)?j.fav:[];}}catch(e){}}
+function lsSave(){try{localStorage.setItem(LS,JSON.stringify({profile:state.profile,days:state.days,fav:state.fav}));}catch(e){}}
+function hasLocal(){return !!state.profile||state.fav.length>0||Object.keys(state.days).some(function(k){var d=state.days[k];return d&&((d.entries&&d.entries.length)||(d.exercises&&d.exercises.length)||d.weight);});}
 
 function setCloud(s){
   state.cloud=s;
@@ -716,6 +802,11 @@ function persistProfile(){
   if(!db||!userId||!state.profile)return Promise.resolve();
   return queue('profile',function(){return cdoc('profile').set(clean(state.profile));}).catch(function(){setCloud('error');toast(tr('save_fail'));});
 }
+function persistPrefs(){
+  lsSave();
+  if(!db||!userId)return Promise.resolve();
+  return queue('prefs',function(){return cdoc('prefs').set(clean({fav:state.fav}));}).catch(function(){setCloud('error');toast(tr('save_fail'));});
+}
 function startCloud(){
   var timer=setTimeout(function(){if(state.cloud==='connecting')setCloud('slow');},10000);
   db.collection('data/users/'+userId).onSnapshot(function(snap){
@@ -725,15 +816,17 @@ function startCloud(){
     if(!cached&&snap.empty&&hasLocal()){
       Object.keys(state.days).forEach(function(k){persistDay(k);});
       persistProfile();
+      if(state.fav.length)persistPrefs();
       return;
     }
-    var days={},profile=null;
+    var days={},profile=null,fav=null;
     snap.docs.forEach(function(d){
       var x=clean(d.data()||{}); /* snapshot data is frozen: work on a plain copy so entries can be added and removed */
       if(d.id==='profile')profile=x;
+      else if(d.id==='prefs')fav=Array.isArray(x.fav)?x.fav:[];
       else if(d.id.indexOf('d-')===0)days[d.id.slice(2)]={entries:Array.isArray(x.entries)?x.entries:[],exercises:Array.isArray(x.exercises)?x.exercises:[],weight:x.weight>0?x.weight:undefined};
     });
-    state.days=days;state.profile=profile;lsSave();
+    state.days=days;state.profile=profile;if(fav)state.fav=fav;lsSave();
     if(!state.touched)state.draft=draftFrom(profile);
     if(state.tab!=='profil'||!state.touched)render();
   },function(){clearTimeout(timer);setCloud('error');});
@@ -787,9 +880,10 @@ function exHtml(k){
   return '<section class="sect"><h3><span>'+esc(tr('ex_title'))+'</span><span>'+fmt(burn(k))+' kcal</span></h3>'+arr.map(function(e){
     var sub=[];
     if(e.min)sub.push(e.min+' '+tr('ex_min'));
-    if(e.met)sub.push('MET '+e.met);
+    if(e.km)sub.push(e.km+' km');
+    if(e.met)sub.push('MET '+r1(e.met));
     if(e.w)sub.push(r1(e.w)+' kg');
-    return '<div class="entry ex"><div><div class="nm">'+esc(e.name)+'</div><div class="sub">'+esc(sub.join(' · '))+'</div></div><div class="kc2">'+fmt(e.kcal)+'<small>kcal</small><button class="link" data-act="del-ex" data-id="'+esc(e.id)+'">'+esc(tr('del'))+'</button></div></div>';
+    return '<div class="entry ex"><div><div class="nm">'+esc(e.name)+'</div><div class="sub">'+esc(sub.join(' · '))+'</div>'+(e.note?'<div class="sub exnote">'+esc(e.note)+'</div>':'')+'</div><div class="kc2">'+fmt(e.kcal)+'<small>kcal</small><button class="link" data-act="del-ex" data-id="'+esc(e.id)+'">'+esc(tr('del'))+'</button></div></div>';
   }).join('')+'</section>';
 }
 function renderLog(){
@@ -818,7 +912,7 @@ function renderLog(){
    (tg?'<div class="gauge'+(over?' over':'')+'" role="img" aria-label="'+esc(tr('gauge',Math.round(pct)))+'"><i style="width:'+pct+'%"></i></div>':'')+
    '<div class="rows">'+macros+'</div>'+(burned>0?'<div class="sub2">'+esc(tr('exsum',fmt(burned),fmt(t.k-burned)))+'</div>':'')+'</section>'+
    (tg?'':'<div class="banner"><span>'+esc(tr('banner'))+'</span><button class="btn" data-act="tab" data-tab="profil">'+esc(tr('setgoal'))+'</button></div>')+
-   '<div class="actions one"><button class="btn primary" data-act="add-manual">'+esc(tr('manual'))+'</button></div>'+
+   '<div class="actions"><label class="btn primary" for="photo" role="button" tabindex="0">'+CAM+esc(tr('photo'))+'</label><button class="btn" data-act="add-manual">'+esc(tr('manual'))+'</button></div>'+
    '<button class="btn block" data-act="add-ex">'+FLAME+esc(tr('ex_add'))+'</button>'+
    list+exHtml(k);
 }
@@ -952,24 +1046,107 @@ function foodListHtml(){
 function catBarHtml(){
   return '<div class="catbar" role="group" aria-label="'+esc(tr('cat_aria'))+'">'+['all'].concat(CATS).map(function(c){return '<button type="button" class="chip" data-act="cat" data-v="'+c+'" aria-pressed="'+(S.cat===c)+'">'+esc(tr('cat_'+c))+'</button>';}).join('')+'</div>';
 }
+var CHEV='<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+var BACK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
+var FUNNEL='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h8M17 7h3M4 17h3M12 17h8"/><circle cx="14.5" cy="7" r="2.3"/><circle cx="9.5" cy="17" r="2.3"/></svg>';
+var STAR='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.9 6.8 19.7l1-5.9L3.5 9.7l5.9-.8z"/></svg>';
+var PLUS='<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>';
+function num(v){var n=parseFloat(String(v==null?'':v).replace(',','.'));return isNaN(n)?null:n;}
+function exByKey(k){for(var i=0;i<EXERCISES.length;i++)if(EXERCISES[i].k===k)return i;return -1;}
+function exIdxFor(e){
+  if(e.x){var i=exByKey(e.x);if(i>=0)return i;}
+  var nm=String(e.name||'').trim().toLowerCase();
+  if(nm)for(var j=0;j<EXERCISES.length;j++)if(EXERCISES[j].n.toLowerCase()===nm||EXERCISES[j].e.toLowerCase()===nm)return j;
+  return -1;
+}
+/* newest first, one row per exercise (built-in) or per name (own) */
+function exRecent(){
+  var out=[],seen={};
+  Object.keys(state.days).sort().reverse().forEach(function(dk){
+    var d=state.days[dk];
+    ((d&&d.exercises)||[]).slice().sort(function(a,b){return String(b.t).localeCompare(String(a.t));}).forEach(function(e){
+      var i=exIdxFor(e),key=i>=0?'k:'+EXERCISES[i].k:'c:'+String(e.name||'').trim().toLowerCase();
+      if(seen[key]||out.length>=20)return;
+      seen[key]=1;out.push({i:i,e:e});
+    });
+  });
+  return out;
+}
+function exRowHtml(act,attrs,icon,name,sub){
+  return '<button type="button" class="pickrow exrow" data-act="'+act+'" '+attrs+'><span class="exic">'+icon+'</span><span class="ext"><b>'+esc(name)+'</b><small>'+esc(sub)+'</small></span>'+CHEV+'</button>';
+}
+function exCatBarHtml(){
+  return '<div class="catbar" id="excats"'+(S.exFilt?'':' hidden')+' role="group" aria-label="'+esc(tr('ex_filter'))+'">'+['all'].concat(EXCATS).map(function(c){return '<button type="button" class="chip" data-act="ex-cat" data-v="'+c+'" aria-pressed="'+(S.exCat===c)+'">'+esc(c==='all'?tr('ex_tab_all'):tr('excat_'+c))+'</button>';}).join('')+'</div>';
+}
 function exListHtml(){
-  var toks=S.exq.trim().toLowerCase().split(/\s+/).filter(Boolean),w=bodyWeight(),h='';
-  EXERCISES.forEach(function(a,i){
-    var hay=(a.n+' '+a.e).toLowerCase(),ok=true;
+  var toks=S.exq.trim().toLowerCase().split(/\s+/).filter(Boolean),h='',rows=[];
+  if(S.exTab==='recent'){
+    exRecent().forEach(function(r,j){rows.push({a:r.i>=0?EXERCISES[r.i]:null,i:r.i,j:j,e:r.e});});
+  }else if(S.exTab==='fav'){
+    EXERCISES.forEach(function(a,i){if(state.fav.indexOf(a.k)>=0)rows.push({a:a,i:i});});
+  }else{
+    EXERCISES.forEach(function(a,i){rows.push({a:a,i:i});});
+  }
+  rows.forEach(function(r){
+    var a=r.a,name=a?exName(a):String(r.e.name||tr('ex_default')),hay=(a?a.n+' '+a.e:name).toLowerCase(),ok=true;
+    if(S.exCat!=='all'&&(!a||a.cat!==S.exCat))return;
     for(var j=0;j<toks.length;j++)if(hay.indexOf(toks[j])<0){ok=false;break;}
     if(!ok)return;
-    h+='<button type="button" class="pickrow" data-act="ex-pick" data-i="'+i+'"><span><b>'+esc(exName(a))+'</b><small>'+esc(exDesc(a))+'</small></span><em>'+esc(w?tr('ex_per30',fmt(a.met*w*0.5)):'MET '+a.met)+'</em></button>';
+    var sub=a?exDesc(a):tr('ex_custom_lbl');
+    if(r.e)sub=tr('ex_last',r.e.min?r.e.min+' '+tr('ex_min')+' · ':'',fmt(r.e.kcal));
+    h+=exRowHtml(S.exTab==='recent'?'ex-recent':'ex-pick',S.exTab==='recent'?'data-j="'+r.j+'"':'data-i="'+r.i+'"',exIcon(a?a.ic:'pencil'),name,sub);
   });
-  return h||'<p class="note">'+esc(tr('ex_nomatch'))+'</p>';
+  if(h)return h;
+  var em=S.exTab==='recent'&&S.exCat==='all'&&!toks.length?'ex_empty_recent':(S.exTab==='fav'&&S.exCat==='all'&&!toks.length?'ex_empty_fav':'ex_nomatch');
+  return '<p class="note">'+esc(tr(em))+'</p>';
 }
-function exCalc(){
-  var X=S.ex;if(!X)return null;
-  if(X.custom){var kk=parseFloat(String(X.kcal).replace(',','.'));return kk>=0?kk:null;}
-  var w=parseFloat(String(X.w).replace(',','.')),m=parseFloat(String(X.min).replace(',','.'));
+/* MET for this exercise: when a distance is given, the average speed picks the MET */
+function exInfo(X){
+  var a=X.i>=0?EXERCISES[X.i]:null;
+  if(!a)return {met:0,sp:0,adj:false,off:false};
+  var met=a.met,sp=0,adj=false,off=false,km=num(X.km),mi=num(X.min),R=EXR[a.kind];
+  if(R&&km>0&&mi>0){
+    sp=km/(mi/60);
+    if(sp>=R.lo&&sp<=R.hi){met=interp(R.t,sp);adj=true;}else off=true;
+  }
+  return {met:met,sp:sp,adj:adj,off:off};
+}
+function exOv(X){var v=num(X.kcal);return String(X.kcal==null?'':X.kcal).trim()!==''&&v!=null&&v>=0?v:null;}
+function exEst(X){
+  if(!X||X.custom)return null;
+  var w=num(X.w),m=num(X.min);
   if(!(w>=20&&w<=400)||!(m>0&&m<=1440))return null;
-  return X.met*w*m/60;
+  return exInfo(X).met*w*m/60;
 }
-function exTotalHtml(){var k=exCalc();return esc(k==null?tr(S.ex&&S.ex.custom?'ex_need_k':'ex_need'):tr('ex_est',fmt(k)));}
+function exCalc(){var X=S.ex;if(!X)return null;var o=exOv(X);return o!=null?o:exEst(X);}
+function exTotalHtml(){
+  var X=S.ex,k=exCalc();
+  if(!X)return '';
+  if(k==null)return esc(tr(X.custom?'ex_need_k':'ex_need'));
+  var inf=exInfo(X),sub='';
+  if(!X.custom&&exOv(X)==null){
+    if(inf.adj)sub=tr('ex_speed',r1(inf.sp),r1(inf.met));
+    else if(inf.off)sub=tr('ex_speed_off');
+    else sub='MET '+r1(inf.met);
+  }
+  return esc(tr('ex_est',fmt(k)))+(sub?'<span>'+esc(sub)+'</span>':'');
+}
+function updateExUi(){
+  var t=$('#exTotal');if(t)t.innerHTML=exTotalHtml();
+  var kc=$('#exkcal');
+  if(kc&&S.ex&&!S.ex.custom){var est=exEst(S.ex);kc.placeholder=est!=null?String(Math.round(est)):tr('ex_kcal_ph');}
+}
+function openEx(i,rec){
+  var a=EXERCISES[i];if(!a)return;
+  var bw=bodyWeight(),last=rec||(exRecent().filter(function(r){return r.i===i;})[0]||{}).e||null;
+  S.ex={i:i,name:exName(a),min:last&&last.min?String(last.min):'30',km:last&&last.km?String(last.km):'',w:bw?String(bw):'',kcal:'',note:'',custom:false};
+  S.mode='exedit';renderSheet();
+}
+function openCustomEx(e){
+  S.ex={i:-1,name:e?String(e.name||''):'',min:e&&e.min?String(e.min):'30',km:'',w:'',kcal:e&&e.kcal!=null?String(e.kcal):'',note:'',custom:true};
+  S.mode='exedit';renderSheet();
+}
+var lastMode='';
 function renderSheet(){
   var el=$('#sheet'),pn=$('#panel');
   if(!S.open){el.hidden=true;document.body.style.overflow='';return;}
@@ -977,7 +1154,7 @@ function renderSheet(){
   var head=function(ttl){return '<div class="phead"><h2>'+esc(ttl)+'</h2><button class="icon-btn" data-act="sheet-close" aria-label="'+esc(tr('close'))+'">'+X+'</button></div>';};
   var prev=S.preview?'<img class="prev" src="'+S.preview+'" alt="'+esc(tr('photo_alt'))+'">':'';
   var h='';
-  pn.className='panel'+(S.mode==='pick'||S.mode==='expick'?' tall':'');
+  pn.className='panel'+(S.mode==='pick'||S.mode==='expick'||S.mode==='exedit'?' tall':'');
   if(S.mode==='busy'){
     h=head(tr('busy_ttl'))+prev+'<div class="busy"><div class="spin"></div><p>'+esc(tr('busy_txt'))+'</p></div><button class="btn block" data-act="sheet-close">'+esc(tr('cancel'))+'</button>';
   }else if(S.mode==='error'){
@@ -998,24 +1175,34 @@ function renderSheet(){
       '<div class="total" id="sheetTotal">'+totalHtml()+'</div>'+
       '<div class="btnrow"><button class="btn" data-act="sheet-close">'+esc(tr('cancel'))+'</button><button class="btn primary" data-act="save-sheet">'+esc(tr('save_log'))+'</button></div>';
   }else if(S.mode==='expick'){
-    h='<div class="pickhead">'+head(tr('ex_add'))+'<input class="in" id="exq" type="search" placeholder="'+esc(tr('ex_search_ph'))+'" aria-label="'+esc(tr('ex_search_aria'))+'" value="'+esc(S.exq)+'" autocomplete="off"></div>'+
+    h='<div class="pickhead">'+head(tr('ex_log_ttl'))+
+      '<div class="exsearch"><input class="in" id="exq" type="search" placeholder="'+esc(tr('ex_search_ph'))+'" aria-label="'+esc(tr('ex_search_aria'))+'" value="'+esc(S.exq)+'" autocomplete="off"><button type="button" class="icon-btn" id="exfbtn" data-act="ex-filter" aria-pressed="'+(S.exFilt||S.exCat!=='all')+'" aria-label="'+esc(tr('ex_filter'))+'">'+FUNNEL+'</button></div>'+
+      exCatBarHtml()+
+      '<div class="seg" role="group" aria-label="'+esc(tr('ex_tabs_aria'))+'">'+[['all','ex_tab_all'],['recent','ex_tab_recent'],['fav','ex_tab_fav']].map(function(t){return '<button type="button" data-act="ex-tab" data-v="'+t[0]+'" aria-pressed="'+(S.exTab===t[0])+'">'+esc(tr(t[1]))+'</button>';}).join('')+'</div></div>'+
       '<div class="foodlist" id="exlist">'+exListHtml()+'</div>'+
       '<p class="note" style="margin:0">'+esc(tr('ex_note_pick'))+'</p>'+
-      '<div class="pickfoot"><div class="btnrow"><button class="btn" data-act="ex-blank">'+esc(tr('own'))+'</button><button class="btn" data-act="sheet-close">'+esc(tr('cancel'))+'</button></div></div>';
+      '<div class="pickfoot"><button class="btn block" data-act="ex-blank">'+PLUS+esc(tr('ex_custom'))+'</button></div>';
   }else if(S.mode==='exedit'){
-    var xe=S.ex||{},xa=xe.i>=0?EXERCISES[xe.i]:null;
-    h=head(tr('ex_detail'))+
-      '<div class="item"><input class="nameinp" id="exname" value="'+esc(xe.name)+'" placeholder="'+esc(tr('ex_name'))+'" aria-label="'+esc(tr('ex_name'))+'" maxlength="60">'+
-      (xa?'<div class="note">'+esc(exDesc(xa))+' · MET '+xa.met+'</div>':'')+
+    var xe=S.ex||{},xa=xe.i>=0?EXERCISES[xe.i]:null,isFav=!!xa&&state.fav.indexOf(xa.k)>=0;
+    var est=exEst(xe),kph=est!=null?String(Math.round(est)):tr('ex_kcal_ph');
+    h='<div class="pickhead"><div class="phead"><button class="icon-btn" data-act="ex-back" aria-label="'+esc(tr('ex_back'))+'">'+BACK+'</button><h2>'+esc(tr('ex_log_ttl'))+'</h2>'+(xa?'<button type="button" class="icon-btn star" data-act="ex-fav" aria-pressed="'+isFav+'" aria-label="'+esc(tr('ex_fav'))+'">'+STAR+'</button>':'<button class="icon-btn" data-act="sheet-close" aria-label="'+esc(tr('close'))+'">'+X+'</button>')+'</div></div>'+
+      '<div class="exhero"><div class="excat">'+esc(xa?tr('excat_'+xa.cat):tr('ex_custom_lbl'))+'</div>'+
+      '<div class="exbig">'+exIcon(xa?xa.ic:'pencil')+'</div>'+
+      (xa?'<h3 class="exnm">'+esc(exName(xa))+'</h3><p class="note" style="margin:0">'+esc(exDesc(xa))+'</p>':'<input class="nameinp exnm" id="exname" value="'+esc(xe.name)+'" placeholder="'+esc(tr('ex_name'))+'" aria-label="'+esc(tr('ex_name'))+'" maxlength="60">')+'</div>'+
+      '<div class="item exform">'+
       '<div class="field"><label for="exmin">'+esc(tr('ex_dur'))+'</label><div class="chips" role="group" aria-label="'+esc(tr('ex_dur'))+'">'+[15,30,45,60,90].map(function(m){return '<button type="button" class="chip" data-act="ex-min" data-m="'+m+'" aria-pressed="'+(String(xe.min)===String(m))+'">'+m+'</button>';}).join('')+'</div><input class="in" id="exmin" inputmode="numeric" value="'+esc(xe.min)+'"></div>'+
-      (xe.custom?'<div class="field"><label for="exkcal">'+esc(tr('ex_kcal_in'))+'</label><input class="in" id="exkcal" inputmode="decimal" value="'+esc(xe.kcal)+'"></div>':'<div class="field"><label for="exw">'+esc(tr('ex_weight'))+'</label><input class="in" id="exw" inputmode="decimal" value="'+esc(xe.w)+'"></div>')+
+      (!xa||xa.kind?'<div class="field"><label for="exkm">'+esc(tr('ex_km'))+' <span class="opt">'+esc(tr('ex_opt'))+'</span></label><input class="in" id="exkm" inputmode="decimal" value="'+esc(xe.km)+'" placeholder="0.0"></div>':'')+
+      '<div class="field"><label for="exkcal">'+esc(tr('ex_kcal_in'))+(xe.custom?'':' <span class="opt">'+esc(tr('ex_opt'))+'</span>')+'</label><input class="in" id="exkcal" inputmode="decimal" value="'+esc(xe.kcal)+'" placeholder="'+esc(xe.custom?tr('ex_kcal_ph'):kph)+'">'+(xe.custom?'':'<span class="note" style="margin:0">'+esc(tr('ex_kcal_hint'))+'</span>')+'</div>'+
+      (xe.custom?'':'<div class="field"><label for="exw">'+esc(tr('ex_weight'))+'</label><input class="in" id="exw" inputmode="decimal" value="'+esc(xe.w)+'"></div>')+
+      '<div class="field"><label for="exnote">'+esc(tr('ex_notes'))+' <span class="opt">'+esc(tr('ex_opt'))+'</span></label><textarea class="in ta" id="exnote" rows="3" maxlength="300" placeholder="'+esc(tr('ex_notes_ph'))+'">'+esc(xe.note)+'</textarea></div>'+
       '</div><div class="total" id="exTotal">'+exTotalHtml()+'</div>'+
-      '<div class="btnrow"><button class="btn" data-act="sheet-close">'+esc(tr('cancel'))+'</button><button class="btn primary" data-act="save-ex">'+esc(tr('ex_save'))+'</button></div>';
+      '<div class="pickfoot"><button class="btn primary block" data-act="save-ex">'+esc(tr('ex_save'))+'</button></div>';
   }
   pn.innerHTML=h;
+  if(S.mode!==lastMode){pn.scrollTop=0;lastMode=S.mode;}
 }
 function openSheet(mode){S.open=true;S.mode=mode;renderSheet();}
-function closeSheet(){aid++;if(ctl){try{ctl.abort();}catch(e){}ctl=null;}S.open=false;S.items=[];S.preview=null;S.th=null;S.blob=null;S.note='';S.conf='';S.err='';S.q='';S.cat='all';S.ex=null;S.exq='';renderSheet();}
+function closeSheet(){aid++;if(ctl){try{ctl.abort();}catch(e){}ctl=null;}S.open=false;S.items=[];S.preview=null;S.th=null;S.blob=null;S.note='';S.conf='';S.err='';S.q='';S.cat='all';S.ex=null;S.exq='';S.exTab='all';S.exCat='all';S.exFilt=false;renderSheet();}
 function sheetError(code,note){S.mode='error';S.err=code;S.note=note||'';renderSheet();}
 
 function normItem(x){
@@ -1112,11 +1299,15 @@ function saveEx(){
   if(!day.entries)day.entries=[];
   if(!day.exercises)day.exercises=[];
   var base=k===todayKey()?new Date():new Date(fromKey(k).getTime()+12*36e5);
-  var m=parseFloat(String(X.min).replace(',','.')),e={id:newId(),t:base.toISOString(),name:(X.name||'').trim()||tr('ex_default'),kcal:Math.round(kc)};
+  var m=num(X.min),km=num(X.km),w=num(X.w),note=String(X.note||'').trim();
+  var e={id:newId(),t:base.toISOString(),name:(X.name||'').trim()||tr('ex_default'),kcal:Math.round(kc)};
+  if(!X.custom&&X.i>=0)e.x=EXERCISES[X.i].k;
   if(m>0)e.min=Math.round(m);
-  if(!X.custom){
-    e.met=X.met;
-    var w=parseFloat(String(X.w).replace(',','.'));e.w=r1(w);
+  if(km>0)e.km=Math.round(km*100)/100;
+  if(note)e.note=note.slice(0,300);
+  if(!X.custom&&w>=20&&w<=400){
+    e.w=r1(w);
+    if(exOv(X)==null)e.met=Math.round(exInfo(X).met*100)/100;
     try{localStorage.setItem('kirakalori.exw',String(r1(w)));}catch(er){}
   }
   day.exercises.push(e);
@@ -1197,13 +1388,34 @@ document.addEventListener('click',function(e){
   else if(a==='mult'){var it=S.items[+ds.i];if(it){it.mult=+ds.m;renderSheet();}}
   else if(a==='rm-item'){S.items.splice(+ds.i,1);S.mode=S.items.length?'edit':'pick';renderSheet();}
   else if(a==='save-sheet')saveSheet();
-  else if(a==='add-ex'){S.items=[];S.ex=null;S.exq='';openSheet('expick');}
-  else if(a==='ex-pick'){var xa=EXERCISES[+ds.i],bw=bodyWeight();if(xa){S.ex={i:+ds.i,name:exName(xa),met:xa.met,min:'30',w:bw?String(bw):'',kcal:'',custom:false};S.mode='exedit';renderSheet();}}
-  else if(a==='ex-blank'){S.ex={i:-1,name:'',met:0,min:'30',w:'',kcal:'',custom:true};S.mode='exedit';renderSheet();}
+  else if(a==='add-ex'){S.items=[];S.ex=null;S.exq='';S.exTab='all';S.exCat='all';S.exFilt=false;openSheet('expick');}
+  else if(a==='ex-pick')openEx(+ds.i);
+  else if(a==='ex-recent'){var rc=exRecent()[+ds.j];if(rc){if(rc.i>=0)openEx(rc.i,rc.e);else openCustomEx(rc.e);}}
+  else if(a==='ex-blank')openCustomEx(null);
+  else if(a==='ex-back'){S.ex=null;S.mode='expick';renderSheet();}
+  else if(a==='ex-filter'){
+    S.exFilt=!S.exFilt;var cb=$('#excats');if(cb)cb.hidden=!S.exFilt;
+    b.setAttribute('aria-pressed',String(S.exFilt||S.exCat!=='all'));
+  }
+  else if(a==='ex-cat'){
+    S.exCat=ds.v;
+    b.parentNode.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b));});
+    var fb=$('#exfbtn');if(fb)fb.setAttribute('aria-pressed',String(S.exFilt||S.exCat!=='all'));
+    $('#exlist').innerHTML=exListHtml();$('#panel').scrollTop=0;
+  }
+  else if(a==='ex-tab'){
+    S.exTab=ds.v;
+    b.parentNode.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b));});
+    $('#exlist').innerHTML=exListHtml();$('#panel').scrollTop=0;
+  }
+  else if(a==='ex-fav'){
+    var fa=S.ex&&S.ex.i>=0?EXERCISES[S.ex.i]:null;
+    if(fa){var fi=state.fav.indexOf(fa.k);if(fi<0)state.fav.push(fa.k);else state.fav.splice(fi,1);b.setAttribute('aria-pressed',String(fi<0));persistPrefs();}
+  }
   else if(a==='ex-min'){
     if(S.ex){S.ex.min=ds.m;var mi=$('#exmin');if(mi)mi.value=ds.m;
       b.parentNode.querySelectorAll('button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b));});
-      $('#exTotal').innerHTML=exTotalHtml();}
+      updateExUi();}
   }
   else if(a==='save-ex')saveEx();
   else if(a==='del-ex')delEx(ds.id);
@@ -1218,15 +1430,16 @@ document.addEventListener('click',function(e){
   else if(a==='save-profile')saveProfile();
   else if(a==='save-weight')saveWeight();
 });
+var EXF={exmin:'min',exkm:'km',exw:'w',exkcal:'kcal',exnote:'note'};
 document.addEventListener('input',function(e){
   var t=e.target;
   if(t.id==='q'){S.q=t.value;$('#foodlist').innerHTML=foodListHtml();$('#panel').scrollTop=0;}
   else if(t.id==='exq'){S.exq=t.value;$('#exlist').innerHTML=exListHtml();$('#panel').scrollTop=0;}
   else if(t.id==='exname'){if(S.ex)S.ex.name=t.value;}
-  else if(t.id==='exmin'||t.id==='exw'||t.id==='exkcal'){
-    if(S.ex)S.ex[t.id==='exmin'?'min':(t.id==='exw'?'w':'kcal')]=t.value;
+  else if(EXF[t.id]){
+    if(S.ex)S.ex[EXF[t.id]]=t.value;
     if(t.id==='exmin')document.querySelectorAll('[data-act="ex-min"]').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.m===String(t.value).trim()));});
-    $('#exTotal').innerHTML=exTotalHtml();
+    updateExUi();
   }
   else if(t.classList.contains('nameinp')){var it=S.items[+t.dataset.i];if(it)it.name=t.value;}
   else if(t.classList.contains('numinp')){
@@ -1275,5 +1488,6 @@ function init(){
 init();
 })();
 </script>
+
 </body>
 </html>
