@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="ms">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>[hidden]{display:none!important}label[for="photo"]{display:none}.actions{grid-template-columns:1fr!important}</style>
-<title>KiraKalori</title>
+<title>Orbit</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -288,19 +288,21 @@ h2.sec{font-family:var(--display);font-size:20px;margin:0}
 .exgh>svg.chev{width:18px;height:18px;fill:none;stroke:var(--ink2);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transform:rotate(90deg);transition:transform .15s}
 .exgh[aria-expanded="true"]>svg.chev{transform:rotate(-90deg)}
 .exgb[hidden]{display:none}
+.brand{display:inline-flex;align-items:center;gap:8px}
+.brand .logo{width:24px;height:24px;color:var(--accent);flex:none}
 @media (prefers-reduced-motion:reduce){.exgh>svg.chev{transition:none}.sw,.sw::after{transition:none}.rp.anim{animation:none}.panel{animation:none}.spin{animation:none}}
 </style>
 
 </head>
 <body>
-<header class="top"><div class="wrap"><span class="brand">KiraKalori</span><div class="hr"><span class="sync" id="sync"><i></i><span id="syncT">Menyambung…</span></span><div class="lang" role="group" data-ta="langaria" aria-label="Bahasa / Language"><button type="button" data-act="lang" data-lang="ms" aria-pressed="true">BM</button><button type="button" data-act="lang" data-lang="en" aria-pressed="false">EN</button></div></div></div></header>
+<header class="top"><div class="wrap"><span class="brand"><svg class="logo" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="44 16" transform="rotate(-70 12 12)"/><circle cx="12" cy="12" r="4.6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="20 9" transform="rotate(110 12 12)"/></svg>Orbit</span><div class="hr"><span class="sync" id="sync"><i></i><span id="syncT">Connecting…</span></span><div class="lang" role="group" data-ta="langaria" aria-label="Language / Bahasa"><button type="button" data-act="lang" data-lang="en" aria-pressed="true">EN</button><button type="button" data-act="lang" data-lang="ms" aria-pressed="false">BM</button></div></div></div></header>
 <main id="view" class="wrap"></main>
 
 <nav class="tabs" data-ta="nav" aria-label="Menu utama"><div class="wrap">
   <button data-act="tab" data-tab="log"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v7a2 2 0 0 0 2 2v9M10 3v7a2 2 0 0 1-2 2M18 3c-2.2 1.2-3.5 3.8-3.5 7H18v11"/></svg><span data-t="tab_log">Log</span></button>
-  <button data-act="tab" data-tab="ex"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7.5v9M17.5 7.5v9M3.5 10v4M20.5 10v4M6.5 12h11"/></svg><span data-t="tab_ex">Senaman</span></button>
-  <button data-act="tab" data-tab="kal"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span data-t="tab_kal">Kalendar</span></button>
-  <button data-act="tab" data-tab="profil"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20.5c.8-4 3.7-6 7.5-6s6.7 2 7.5 6"/></svg><span data-t="tab_profil">Profil</span></button>
+  <button data-act="tab" data-tab="ex"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 7.5v9M17.5 7.5v9M3.5 10v4M20.5 10v4M6.5 12h11"/></svg><span data-t="tab_ex">Exercise</span></button>
+  <button data-act="tab" data-tab="kal"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span data-t="tab_kal">Calendar</span></button>
+  <button data-act="tab" data-tab="profil"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20.5c.8-4 3.7-6 7.5-6s6.7 2 7.5 6"/></svg><span data-t="tab_profil">Profile</span></button>
 </div></nav>
 
 <div id="sheet" class="sheet" hidden role="dialog" aria-modal="true" data-ta="sheet_aria" aria-label="Tambah makanan"><div id="panel" class="panel"></div></div>
@@ -326,7 +328,7 @@ var kcOf=function(f){return Math.round(4*f.p+4*f.c+9*f.f);};
 /* ---------- language (Bahasa Malaysia / English) ---------- */
 var EB=false;try{EB=localStorage.getItem('kirakalori.eb')==='1';}catch(e){}
 var LSL='kirakalori.lang';
-var LANG='ms';
+var LANG='en';
 try{var savedLang=localStorage.getItem(LSL);if(savedLang==='en'||savedLang==='ms')LANG=savedLang;}catch(e){}
 
 var I18N={
@@ -438,7 +440,7 @@ en:{
  mshort:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
  wd:['Mo','Tu','We','Th','Fr','Sa','Su'],
  connecting:'Connecting…',cloud_ok:'Saved to your account',cloud_local:'Saved on this device',cloud_slow:'Not connected',cloud_error:'Could not save to account',
- nav:'Main menu',tab_log:'Log',tab_kal:'Calendar',tab_profil:'Profile',langaria:'Bahasa / Language',
+ nav:'Main menu',tab_log:'Log',tab_kal:'Calendar',tab_profil:'Profile',langaria:'Language / Bahasa',
  sheet_aria:'Add food',
  save_fail:'Could not save to your account. Your data is still on this device.',
  meal_sarapan:'Breakfast',meal_tengahari:'Lunch',meal_snek:'Snacks and drinks',meal_malam:'Dinner',
