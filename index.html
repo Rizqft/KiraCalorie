@@ -88,7 +88,7 @@ main{display:flex;flex-direction:column;gap:18px;padding-block:16px calc(92px + 
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .btn .ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .link{border:0;background:none;padding:6px 0;color:var(--ink2);font-size:12.5px;font-weight:600;text-decoration:underline;cursor:pointer}
-.actions{display:grid;grid-template-columns:1.4fr 1fr;gap:10px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 
 .banner{background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;font-size:14px}
 .sect h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin:0 0 2px;display:flex;justify-content:space-between;gap:8px}
@@ -216,7 +216,23 @@ h2.sec{font-family:var(--display);font-size:20px;margin:0}
 .ta{padding:10px 12px;min-height:84px;resize:vertical;line-height:1.4;font-family:inherit}
 .exnote{font-style:italic}
 .pickfoot .btn.block{width:100%}
-@media (prefers-reduced-motion:reduce){.panel{animation:none}.spin{animation:none}}
+.ringcard{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px 16px 16px}
+.ringwrap{position:relative;width:min(100%,268px);margin:0 auto}
+.ringwrap svg{display:block;width:100%;height:auto}
+.ringc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none}
+.ringc b{font-family:var(--display);font-size:25px;line-height:1;font-variant-numeric:tabular-nums;font-weight:400}
+.ringc span{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);margin-top:3px}
+.ringc.over b,.ringc.over span{color:var(--warn)}
+.rcells{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.rc{background:var(--bg);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:1px;min-width:0}
+.rl{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--ink2)}
+.rl i{width:10px;height:10px;border-radius:50%;flex:none}
+.rc b{font-family:var(--display);font-size:24px;line-height:1.15;font-weight:400;font-variant-numeric:tabular-nums}
+.rg{font-size:12.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.ringcard .sub2{margin-top:12px}
+@keyframes rg{from{stroke-dasharray:0 var(--c)}}
+.rp.anim{animation:rg .9s cubic-bezier(.2,.7,.2,1) both}
+@media (prefers-reduced-motion:reduce){.rp.anim{animation:none}.panel{animation:none}.spin{animation:none}}
 </style>
 
 </head>
@@ -270,6 +286,7 @@ ms:{
  prot:'Prot',carb:'Karbo',fat:'Lemak',protein:'Protein',carbs:'Karbohidrat',fats:'Lemak',
  del:'Padam',today:'Hari ini',yesterday:'Semalam',
  over:function(n){return 'Lebih '+n;},left:function(n){return 'Baki '+n;},ofkcal:function(n){return 'daripada '+n+' kcal';},
+ cal_lbl:'Kalori',ring_left:'baki',ring_over:'lebih',ring_eaten:'dimakan',
  nogoal:'Sasaran belum ditetapkan',gauge:function(p){return p+' peratus daripada sasaran';},
  label_ttl:'Maklumat Pemakanan',label_small:'Anggaran',label_aria:'Ringkasan pemakanan',
  banner:'Tetapkan sasaran harian di Profil untuk melihat baki kalori dan sasaran protein, karbohidrat dan lemak.',setgoal:'Tetapkan sasaran',
@@ -368,6 +385,7 @@ en:{
  prot:'Prot',carb:'Carbs',fat:'Fat',protein:'Protein',carbs:'Carbohydrates',fats:'Fat',
  del:'Delete',today:'Today',yesterday:'Yesterday',
  over:function(n){return 'Over '+n;},left:function(n){return 'Left '+n;},ofkcal:function(n){return 'of '+n+' kcal';},
+ cal_lbl:'Calories',ring_left:'left',ring_over:'over',ring_eaten:'eaten',
  nogoal:'No daily goal set',gauge:function(p){return p+' percent of goal';},
  label_ttl:'Nutrition Information',label_small:'Estimate',label_aria:'Nutrition summary',
  banner:'Set your daily goal in Profile to see calories left and your protein, carbohydrate and fat targets.',setgoal:'Set goal',
@@ -886,16 +904,45 @@ function exHtml(k){
     return '<div class="entry ex"><div><div class="nm">'+esc(e.name)+'</div><div class="sub">'+esc(sub.join(' · '))+'</div>'+(e.note?'<div class="sub exnote">'+esc(e.note)+'</div>':'')+'</div><div class="kc2">'+fmt(e.kcal)+'<small>kcal</small><button class="link" data-act="del-ex" data-id="'+esc(e.id)+'">'+esc(tr('del'))+'</button></div></div>';
   }).join('')+'</section>';
 }
+var lastRingDate='';
+function ringCardHtml(k,t,tg,burned){
+  var eb=!!tg&&eatBack()&&burned>0,goalK=tg?tg.kcal+(eb?burned:0):0,diff=goalK-t.k,over=!!tg&&diff<0;
+  var pct=tg?Math.min(100,t.k/goalK*100):0,anim=lastRingDate!==k;lastRingDate=k;
+  var rings=[
+    {r:104,c:over?'var(--warn)':'var(--accent)',v:t.k,g:goalK,gl:'',u:'kcal',lb:tr('cal_lbl')},
+    {r:86,c:'var(--protein)',v:t.p,g:tg&&tg.protein,gl:tr('protein'),u:'g',lb:tr('protein')},
+    {r:68,c:'var(--carb)',v:t.c,g:tg&&tg.carbs,gl:tr('carbs'),u:'g',lb:tr('carbs')},
+    {r:50,c:'var(--fat)',v:t.f,g:tg&&tg.fat,gl:tr('fats'),u:'g',lb:tr('fats')}
+  ];
+  var svg='',cells='';
+  rings.forEach(function(q,i){
+    var C=2*Math.PI*q.r,f=q.g>0?Math.min(1,q.v/q.g):0,L=C*f,id='rm'+i;
+    svg+='<g transform="rotate(-90 120 120)"><circle cx="120" cy="120" r="'+q.r+'" fill="none" stroke="'+q.c+'" stroke-width="12" stroke-dasharray="1.7 1.9" opacity=".22"/>';
+    if(f>0.004){
+      svg+='<mask id="'+id+'" maskUnits="userSpaceOnUse" x="0" y="0" width="240" height="240"><circle class="rp'+(anim?' anim':'')+'" cx="120" cy="120" r="'+q.r+'" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round" stroke-dasharray="'+L.toFixed(2)+' '+C.toFixed(2)+'" style="--c:'+C.toFixed(2)+'"/></mask>'+
+        '<circle cx="120" cy="120" r="'+q.r+'" fill="none" stroke="'+q.c+'" stroke-width="12" stroke-dasharray="1.7 1.9" mask="url(#'+id+')"/>';
+    }
+    svg+='</g>';
+    var by=120-q.r;
+    svg+='<circle cx="120" cy="'+by+'" r="8.5" fill="'+q.c+'"/>'+(i===0?
+      '<path transform="translate(113 '+(by-7)+') scale(.58)" fill="var(--bg)" d="M12 3c.6 3.2 4.5 5 4.5 9.2a4.5 4.5 0 0 1-9 0c0-1.7.7-2.9 1.7-3.9.2 1.2.9 1.9 1.6 2.2C10.4 8.4 11 5.8 12 3z"/>':
+      '<text x="120" y="'+(by+3.4)+'" text-anchor="middle" font-size="9.5" font-weight="800" fill="var(--bg)">'+esc(q.gl.charAt(0).toUpperCase())+'</text>');
+    cells+='<div class="rc"><span class="rl"><i style="background:'+q.c+'"></i>'+esc(q.lb)+'</span><b>'+fmt(q.v)+'</b><span class="rg">'+(q.g>0?'/ '+fmt(q.g)+' '+q.u:q.u)+'</span></div>';
+  });
+  var cn=tg?fmt(Math.abs(diff)):fmt(t.k),cl=tg?tr(over?'ring_over':'ring_left'):tr('ring_eaten');
+  var sub=[];
+  if(burned>0)sub.push(tr('exsum',fmt(burned),fmt(t.k-burned)));
+  if(eb)sub.push(tr('ofkcal_eb',fmt(tg.kcal),fmt(burned)));
+  return '<section class="ringcard" aria-label="'+esc(tr('label_aria'))+'">'+
+    '<div class="ringwrap"><svg viewBox="0 0 240 240" role="img" aria-label="'+esc(tg?tr('gauge',Math.round(pct)):tr('nogoal'))+'">'+svg+'</svg>'+
+    '<div class="ringc'+(over?' over':'')+'"><b>'+cn+'</b><span>'+esc(cl)+'</span></div></div>'+
+    '<div class="rcells">'+cells+'</div>'+
+    (sub.length?'<div class="sub2">'+esc(sub.join(' · '))+'</div>':'')+
+    '</section>';
+}
 function renderLog(){
   var k=state.date,t=totals(k),tg=target(),tk=todayKey(),burned=burn(k);
   var sub=k===tk?tr('today'):(k===keyOf(new Date(Date.now()-864e5))?tr('yesterday'):'');
-  var rem,pct=0,over=false;
-  if(tg){var eb=eatBack()&&burned>0,goalK=tg.kcal+(eb?burned:0);var diff=goalK-t.k;over=diff<0;pct=Math.min(100,t.k/goalK*100);rem='<div class="rem'+(over?' over':'')+'">'+esc(over?tr('over',fmt(-diff)):tr('left',fmt(diff)))+'<small>'+esc(eb?tr('ofkcal_eb',fmt(tg.kcal),fmt(burned)):tr('ofkcal',fmt(goalK)))+'</small></div>';}
-  else rem='<div class="rem"><small>'+esc(tr('nogoal'))+'</small></div>';
-  var macros=[[tr('protein'),t.p,tg&&tg.protein,'var(--protein)'],[tr('carbs'),t.c,tg&&tg.carbs,'var(--carb)'],[tr('fats'),t.f,tg&&tg.fat,'var(--fat)']].map(function(m){
-    var w=m[2]?Math.min(100,m[1]/m[2]*100):0;
-    return '<div class="mrow"><b>'+esc(m[0])+'</b><div class="bar"><i style="width:'+w+'%;background:'+m[3]+'"></i></div><div class="g">'+fmt(m[1])+(m[2]?' <span>/ '+fmt(m[2])+' g</span>':' <span>g</span>')+'</div></div>';
-  }).join('');
   var list='';
   var es=(state.days[k]&&state.days[k].entries)||[];
   MEALKEYS.forEach(function(mk){
@@ -907,10 +954,7 @@ function renderLog(){
   if(!es.length)list='<div class="empty">'+esc(tr('empty'))+'</div>';
   $('#view').innerHTML=
    '<div class="datebar"><button class="icon-btn" data-act="prev-day" aria-label="'+esc(tr('prevday'))+'">'+CH_L+'</button><div class="d"><b>'+esc(dayLabel(k))+'</b><span>'+(sub?esc(sub):'&nbsp;')+'</span></div><button class="icon-btn" data-act="next-day" aria-label="'+esc(tr('nextday'))+'"'+(k>=tk?' disabled':'')+'>'+CH_R+'</button></div>'+
-   '<section class="label" aria-label="'+esc(tr('label_aria'))+'"><div class="ttl">'+esc(tr('label_ttl'))+'<small>'+esc(tr('label_small'))+'</small></div>'+
-   '<div class="kc"><div><span class="n">'+fmt(t.k)+'</span><span class="u">kcal</span></div>'+rem+'</div>'+
-   (tg?'<div class="gauge'+(over?' over':'')+'" role="img" aria-label="'+esc(tr('gauge',Math.round(pct)))+'"><i style="width:'+pct+'%"></i></div>':'')+
-   '<div class="rows">'+macros+'</div>'+(burned>0?'<div class="sub2">'+esc(tr('exsum',fmt(burned),fmt(t.k-burned)))+'</div>':'')+'</section>'+
+   ringCardHtml(k,t,tg,burned)+
    (tg?'':'<div class="banner"><span>'+esc(tr('banner'))+'</span><button class="btn" data-act="tab" data-tab="profil">'+esc(tr('setgoal'))+'</button></div>')+
    '<div class="actions"><label class="btn primary" for="photo" role="button" tabindex="0">'+CAM+esc(tr('photo'))+'</label><button class="btn" data-act="add-manual">'+esc(tr('manual'))+'</button></div>'+
    '<button class="btn block" data-act="add-ex">'+FLAME+esc(tr('ex_add'))+'</button>'+
